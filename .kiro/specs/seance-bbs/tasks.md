@@ -5,36 +5,36 @@ ghost → polish. Each task lists the requirement(s) from `requirements.md`
 it implements. Checkpoints are verification steps: stop, run the listed
 checks, and only then continue.
 
-- [ ] 1. Project skeleton and terminal shell
-  - [ ] 1.1 Create `index.html` with semantic landmarks (`header` status
+- [x] 1. Project skeleton and terminal shell
+  - [x] 1.1 Create `index.html` with semantic landmarks (`header` status
     line, `nav`, `main#screen`, `footer`), the terminal frame, and script/
     style tags for `styles.css` and `app.js`
-  - [ ] 1.2 Create `styles.css` with the CRT theme: phosphor-green palette
+  - [x] 1.2 Create `styles.css` with the CRT theme: phosphor-green palette
     as CSS custom properties, monospace stack, scanline overlay, vignette,
     visible focus indicator
-  - [ ] 1.3 Create `app.js` with the module section banners (Store,
+  - [x] 1.3 Create `app.js` with the module section banners (Store,
     SeedData, BootSequence, Router/Screens, GhostEngine) and a minimal
     boot placeholder that prints "DIALING SÉANCE BBS..." + "CONNECT 14400"
   - _Requirements: 8.1, 8.5_
 
-- [ ] 2. Store layer over localStorage
-  - [ ] 2.1 Implement `Store.load/save/reset/update` against the single
+- [x] 2. Store layer over localStorage
+  - [x] 2.1 Implement `Store.load/save/reset/update` against the single
     versioned key `seance-bbs:v1`, including corrupt-state backup to
     `seance-bbs:backup` and the `restoredFromBackup` flag
-  - [ ] 2.2 Implement id generation and the `update(mutator)` pattern so
+  - [x] 2.2 Implement id generation and the `update(mutator)` pattern so
     every mutation persists and stamps `meta.updatedAt`
   - [ ] 2.3 Verify manually: reload keeps state; hand-corrupted storage
     triggers backup + reseed notice; storage-denied (private mode) shows
     the "TAPE DRIVE OFFLINE" warning and the app still runs
   - _Requirements: 7.2, 7.3, 7.4_
 
-- [ ] 3. Seed content
-  - [ ] 3.1 Author seed boards (at least 3: General Static, Haunted
+- [x] 3. Seed content
+  - [x] 3.1 Author seed boards (at least 3: General Static, Haunted
     Hardware, The Séance Parlor) with names, descriptions, order
-  - [ ] 3.2 Author at least 6 seed threads with replies from fictional 90s
+  - [x] 3.2 Author at least 6 seed threads with replies from fictional 90s
     callers, backdated relative to first run; include 2 pre-written
     SysOp Ghost replies so the ghost is present from minute one
-  - [ ] 3.3 Author at least 8 seed séance log entries and wire the art set
+  - [x] 3.3 Author at least 8 seed séance log entries and wire the art set
     from `assets/art/` into `SEED_ART` (lines arrays, palette flags)
   - [ ] 3.4 Verify: a fresh profile opens to a board that already feels
     alive, with no futuristic timestamps

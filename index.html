@@ -8,21 +8,46 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="crt">
+  <div class="crt" id="crt-root">
+
+    <!-- ═══ STATUS LINE ═══════════════════════════════════════════════ -->
     <header class="status-line" aria-label="Terminal status">
       <span class="status-brand">SÉANCE BBS</span>
-      <span class="status-node">NODE 1 · 555-0199</span>
+      <span class="status-handle" id="status-handle" aria-live="polite"></span>
+      <span class="status-node" id="status-node">NODE 1 · 555-0199</span>
     </header>
 
+    <!-- ═══ NAVIGATION ════════════════════════════════════════════════ -->
+    <nav class="bbs-nav" id="bbs-nav" aria-label="Board navigation" hidden>
+      <ul class="nav-list" role="list">
+        <li><a class="nav-link" href="#/">MENU</a></li>
+        <li><a class="nav-link" href="#/boards">BOARDS</a></li>
+        <li><a class="nav-link" href="#/log">SÉANCE LOG</a></li>
+        <li><a class="nav-link" href="#/gallery">ART GALLERY</a></li>
+        <li><a class="nav-link" href="#/settings">SETTINGS</a></li>
+      </ul>
+    </nav>
+
+    <!-- ═══ MAIN TERMINAL AREA ════════════════════════════════════════ -->
     <main id="screen" class="terminal" aria-label="BBS terminal">
-      <div id="transcript" class="transcript" role="log" aria-live="polite"></div>
-      <p class="cursor-line" aria-hidden="true"><span class="cursor">█</span></p>
+      <!-- Boot transcript — printed by BootSequence before nav is shown -->
+      <div id="transcript" class="transcript" role="log" aria-live="polite" aria-atomic="false"></div>
+      <!-- Active screen content rendered here by Router/Screens -->
+      <div id="active-screen" class="active-screen"></div>
+      <!-- Blinking cursor -->
+      <p class="cursor-line" aria-hidden="true"><span class="cursor" id="cursor">█</span></p>
     </main>
 
-    <footer class="footer-line">
+    <!-- ═══ FOOTER ════════════════════════════════════════════════════ -->
+    <footer class="footer-line" aria-label="Terminal footer">
       <span>EST. 1994 · STILL ANSWERING</span>
+      <span class="footer-skip" id="skip-hint" aria-label="Skip boot sequence">
+        <button type="button" class="skip-btn" id="skip-btn" hidden>[ PRESS ANY KEY TO SKIP ]</button>
+      </span>
+      <span id="footer-clock" class="footer-clock" aria-live="polite"></span>
     </footer>
-  </div>
+
+  </div><!-- /.crt -->
 
   <script src="app.js"></script>
 </body>

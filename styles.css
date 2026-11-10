@@ -1,87 +1,654 @@
-/* Séance BBS — placeholder shell styles.
-   Full CRT theme (scanlines, vignette, contrast mode) lands with the
-   implementation tasks in .kiro/specs/seance-bbs/tasks.md. */
+/* ═══════════════════════════════════════════════════════════════════════
+   Séance BBS — styles.css
+   CRT phosphor-green theme with scanline overlay, vignette, focus rings,
+   and a readable-contrast mode that removes all the visual noise.
+   ═══════════════════════════════════════════════════════════════════════ */
 
+/* ── Custom properties ────────────────────────────────────────────────── */
 :root {
-  --phosphor: #33ff66;
-  --phosphor-dim: #1d9e42;
-  --screen-black: #020604;
+  /* Phosphor palette */
+  --phosphor:        #33ff66;
+  --phosphor-dim:    #1d9e42;
+  --phosphor-bright: #80ffaa;
+  --phosphor-faint:  #0d4a20;
+  --screen-black:    #020604;
+  --screen-bg:       #04100a;
+
+  /* ANSI 16-color palette (used by art renderer) */
+  --ansi-black:         #000000;
+  --ansi-red:           #aa0000;
+  --ansi-green:         #00aa00;
+  --ansi-yellow:        #aa5500;
+  --ansi-blue:          #0000aa;
+  --ansi-magenta:       #aa00aa;
+  --ansi-cyan:          #00aaaa;
+  --ansi-white:         #aaaaaa;
+  --ansi-bright-black:  #555555;
+  --ansi-bright-red:    #ff5555;
+  --ansi-bright-green:  #55ff55;
+  --ansi-bright-yellow: #ffff55;
+  --ansi-bright-blue:   #5555ff;
+  --ansi-bright-magenta:#ff55ff;
+  --ansi-bright-cyan:   #55ffff;
+  --ansi-bright-white:  #ffffff;
+
+  /* SYSOP ghost accent */
+  --sysop-color:    #ff9900;
+  --sysop-dim:      #a06000;
+
+  /* Typography */
   --terminal-font: "Courier New", ui-monospace, Menlo, Consolas, monospace;
+  --base-size: 1.05rem;
+  --line-height: 1.6;
+
+  /* Layout */
+  --terminal-max-width: 900px;
+  --touch-min: 40px;
+
+  /* Scanline / vignette */
+  --scanline-opacity: 0.08;
+  --vignette-opacity: 0.55;
+
+  /* Focus ring */
+  --focus-ring: 0 0 0 2px #000, 0 0 0 4px var(--phosphor);
 }
 
-* {
+/* ── Contrast (readable) mode overrides ──────────────────────────────── */
+.contrast-mode {
+  --phosphor:        #d4f5dc;
+  --phosphor-dim:    #90b898;
+  --phosphor-bright: #ffffff;
+  --phosphor-faint:  #3a4d3e;
+  --screen-black:    #0a0f0b;
+  --screen-bg:       #0a0f0b;
+  --scanline-opacity: 0;
+  --vignette-opacity: 0;
+  --sysop-color:     #ffcc44;
+  --sysop-dim:       #c09030;
+}
+
+/* ── Reset ────────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 html,
 body {
-  margin: 0;
-  padding: 0;
+  height: 100%;
   background: #000;
-  min-height: 100%;
 }
 
 body {
   font-family: var(--terminal-font);
+  font-size: var(--base-size);
+  line-height: var(--line-height);
   color: var(--phosphor);
+  -webkit-font-smoothing: antialiased;
 }
 
+/* ── CRT outer shell ─────────────────────────────────────────────────── */
 .crt {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background:
-    radial-gradient(ellipse at center, #06130a 0%, var(--screen-black) 75%);
-  padding: 1.5rem 1rem;
+  background: radial-gradient(ellipse at 50% 42%, #071a0e 0%, var(--screen-black) 70%);
+  position: relative;
+  overflow: hidden;
+  padding: 1.25rem 1rem 1rem;
 }
 
-.status-line,
-.footer-line {
+/* Scanline overlay — rendered via repeating-linear-gradient on a pseudo */
+.crt::before {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 3px,
+    rgba(0, 0, 0, var(--scanline-opacity)) 3px,
+    rgba(0, 0, 0, var(--scanline-opacity)) 4px
+  );
+  z-index: 10;
+  transition: opacity 0.3s ease;
+}
+
+/* Vignette overlay */
+.crt::after {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    transparent 55%,
+    rgba(0, 0, 0, var(--vignette-opacity)) 100%
+  );
+  z-index: 11;
+  transition: opacity 0.3s ease;
+}
+
+/* ── Status line (header) ────────────────────────────────────────────── */
+.status-line {
   display: flex;
-  justify-content: space-between;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  align-items: baseline;
   color: var(--phosphor-dim);
-  font-size: 0.85rem;
-  letter-spacing: 0.12em;
+  font-size: 0.82rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
+  border-bottom: 1px solid var(--phosphor-faint);
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.5rem;
+  position: relative;
+  z-index: 20;
 }
 
+.status-brand {
+  color: var(--phosphor-bright);
+  font-weight: bold;
+  letter-spacing: 0.2em;
+  text-shadow: 0 0 8px var(--phosphor);
+}
+
+.status-handle {
+  flex: 1;
+  text-align: center;
+  color: var(--phosphor);
+}
+
+.status-node {
+  text-align: right;
+}
+
+/* ── Board navigation ────────────────────────────────────────────────── */
+.bbs-nav {
+  position: relative;
+  z-index: 20;
+  margin-bottom: 0.6rem;
+  border-bottom: 1px solid var(--phosphor-faint);
+  padding-bottom: 0.4rem;
+}
+
+.nav-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+}
+
+.nav-link {
+  color: var(--phosphor-dim);
+  text-decoration: none;
+  font-size: 0.82rem;
+  letter-spacing: 0.12em;
+  padding: 0.15rem 0.3rem;
+  min-height: var(--touch-min);
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+
+.nav-link:hover,
+.nav-link:focus-visible {
+  color: var(--phosphor-bright);
+  text-shadow: 0 0 6px var(--phosphor);
+}
+
+.nav-link:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: 2px;
+}
+
+/* ── Terminal main area ──────────────────────────────────────────────── */
 .terminal {
   flex: 1;
-  width: min(880px, 100%);
-  margin: 1.5rem auto;
-  font-size: 1.05rem;
-  line-height: 1.55;
+  width: 100%;
+  max-width: var(--terminal-max-width);
+  margin: 0 auto;
+  position: relative;
+  z-index: 20;
+  overflow-y: auto;
+  /* Ensure the terminal is never squashed below readable size */
+  min-height: 0;
 }
 
+/* ── Boot / static transcript ───────────────────────────────────────── */
 .transcript {
   white-space: pre-wrap;
   word-break: break-word;
-  text-shadow: 0 0 6px rgba(51, 255, 102, 0.55), 0 0 22px rgba(51, 255, 102, 0.18);
+  color: var(--phosphor);
+  text-shadow:
+    0 0 6px rgba(51, 255, 102, 0.5),
+    0 0 20px rgba(51, 255, 102, 0.15);
 }
 
 .transcript .line {
   display: block;
-  min-height: 1.55em;
+  min-height: 1.6em;
 }
 
-.transcript .final {
-  margin-top: 1.2em;
-  color: var(--phosphor);
+.transcript .line--dim {
+  color: var(--phosphor-dim);
+}
+
+.transcript .line--bright {
+  color: var(--phosphor-bright);
+  text-shadow: 0 0 10px var(--phosphor);
+}
+
+.transcript .line--noise {
+  color: var(--phosphor-faint);
+  letter-spacing: 0.05em;
+}
+
+.transcript .line--banner {
+  color: var(--phosphor-bright);
+  font-weight: bold;
+}
+
+.transcript .line--warn {
+  color: var(--sysop-color);
+}
+
+.transcript .line--error {
+  color: #ff4444;
+}
+
+.transcript .line--gap {
+  min-height: 0.8em;
+}
+
+/* ── Active screen (rendered by Router) ─────────────────────────────── */
+.active-screen {
+  margin-top: 1.2rem;
+}
+
+/* ── Blinking cursor ─────────────────────────────────────────────────── */
+.cursor-line {
+  margin-top: 0.4rem;
+  line-height: 1;
 }
 
 .cursor {
   display: inline-block;
-  animation: blink 1.06s steps(1) infinite;
+  color: var(--phosphor);
+  animation: blink 1.1s steps(1) infinite;
 }
 
 @keyframes blink {
-  0%, 55% { opacity: 1; }
-  56%, 100% { opacity: 0; }
+  0%, 54% { opacity: 1; }
+  55%, 100% { opacity: 0; }
 }
 
+/* ── Footer line ─────────────────────────────────────────────────────── */
+.footer-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--phosphor-dim);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-top: 1px solid var(--phosphor-faint);
+  padding-top: 0.4rem;
+  margin-top: 0.5rem;
+  position: relative;
+  z-index: 20;
+}
+
+.footer-clock {
+  min-width: 8ch;
+  text-align: right;
+}
+
+/* ── Skip button ─────────────────────────────────────────────────────── */
+.skip-btn {
+  background: transparent;
+  border: 1px solid var(--phosphor-dim);
+  color: var(--phosphor-dim);
+  font-family: var(--terminal-font);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+  min-height: var(--touch-min);
+  min-width: var(--touch-min);
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.skip-btn:hover,
+.skip-btn:focus-visible {
+  color: var(--phosphor-bright);
+  border-color: var(--phosphor);
+  text-shadow: 0 0 6px var(--phosphor);
+}
+
+.skip-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* ── Shared form elements ────────────────────────────────────────────── */
+.bbs-form {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 68ch;
+}
+
+.bbs-form label {
+  color: var(--phosphor-dim);
+  font-size: 0.88rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.bbs-input,
+.bbs-textarea {
+  background: var(--screen-bg);
+  border: 1px solid var(--phosphor-dim);
+  color: var(--phosphor);
+  font-family: var(--terminal-font);
+  font-size: var(--base-size);
+  padding: 0.4rem 0.6rem;
+  caret-color: var(--phosphor-bright);
+  resize: vertical;
+  min-height: var(--touch-min);
+  width: 100%;
+  transition: border-color 0.15s;
+}
+
+.bbs-input:focus,
+.bbs-textarea:focus {
+  outline: none;
+  border-color: var(--phosphor);
+  box-shadow: var(--focus-ring);
+}
+
+.bbs-input::placeholder,
+.bbs-textarea::placeholder {
+  color: var(--phosphor-faint);
+}
+
+.bbs-btn {
+  align-self: flex-start;
+  background: transparent;
+  border: 1px solid var(--phosphor);
+  color: var(--phosphor);
+  font-family: var(--terminal-font);
+  font-size: var(--base-size);
+  letter-spacing: 0.1em;
+  padding: 0.3rem 1rem;
+  cursor: pointer;
+  min-height: var(--touch-min);
+  min-width: var(--touch-min);
+  transition: color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.bbs-btn:hover,
+.bbs-btn:focus-visible {
+  background: var(--phosphor-faint);
+  color: var(--phosphor-bright);
+  box-shadow: 0 0 8px var(--phosphor);
+}
+
+.bbs-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.bbs-btn--danger {
+  border-color: #ff4444;
+  color: #ff4444;
+}
+
+.bbs-btn--danger:hover,
+.bbs-btn--danger:focus-visible {
+  background: rgba(255, 68, 68, 0.1);
+  color: #ff7777;
+  box-shadow: 0 0 8px rgba(255, 68, 68, 0.5);
+}
+
+.form-error {
+  color: #ff4444;
+  font-size: 0.88rem;
+}
+
+.form-info {
+  color: var(--phosphor-dim);
+  font-size: 0.82rem;
+}
+
+/* ── Board / thread listing shared styles ────────────────────────────── */
+.bbs-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.bbs-list-item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  align-items: baseline;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid var(--phosphor-faint);
+  min-height: var(--touch-min);
+}
+
+.bbs-list-item:last-child {
+  border-bottom: none;
+}
+
+.list-item-link {
+  color: var(--phosphor);
+  text-decoration: none;
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.list-item-link:hover,
+.list-item-link:focus-visible {
+  color: var(--phosphor-bright);
+  text-shadow: 0 0 6px var(--phosphor);
+}
+
+.list-item-link:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: 2px;
+}
+
+.list-item-meta {
+  color: var(--phosphor-dim);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+/* ── Post / guestbook entry ──────────────────────────────────────────── */
+.post {
+  border-left: 2px solid var(--phosphor-faint);
+  padding: 0.5rem 0 0.5rem 1rem;
+  margin: 0.5rem 0;
+}
+
+.post--ghost {
+  border-left-color: var(--sysop-color);
+}
+
+.post-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  align-items: baseline;
+  margin-bottom: 0.25rem;
+  font-size: 0.82rem;
+  color: var(--phosphor-dim);
+  letter-spacing: 0.06em;
+}
+
+.post-author {
+  color: var(--phosphor);
+  font-weight: bold;
+}
+
+.post-author--sysop {
+  color: var(--sysop-color);
+  text-shadow: 0 0 6px var(--sysop-dim);
+}
+
+.sysop-tag {
+  font-size: 0.72rem;
+  border: 1px solid var(--sysop-dim);
+  color: var(--sysop-color);
+  padding: 0 0.3rem;
+  letter-spacing: 0.1em;
+  vertical-align: middle;
+}
+
+.post-body {
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--phosphor);
+}
+
+/* ── Art gallery / art view ──────────────────────────────────────────── */
+.art-block-wrapper {
+  overflow-x: auto;
+  max-width: 100%;
+  margin-top: 0.5rem;
+  border: 1px solid var(--phosphor-faint);
+  padding: 0.5rem;
+}
+
+.art-block {
+  display: block;
+  font-size: 0.88rem;
+  line-height: 1.25;
+  white-space: pre;
+  color: var(--phosphor);
+  /* Do not wrap art lines */
+  overflow-wrap: normal;
+  word-break: normal;
+  min-width: max-content;
+}
+
+/* ANSI palette CSS classes (used by art renderer after HTML escaping) */
+.a0  { color: var(--ansi-black); }
+.a1  { color: var(--ansi-red); }
+.a2  { color: var(--ansi-green); }
+.a3  { color: var(--ansi-yellow); }
+.a4  { color: var(--ansi-blue); }
+.a5  { color: var(--ansi-magenta); }
+.a6  { color: var(--ansi-cyan); }
+.a7  { color: var(--ansi-white); }
+.a8  { color: var(--ansi-bright-black); }
+.a9  { color: var(--ansi-bright-red); }
+.a10 { color: var(--ansi-bright-green); }
+.a11 { color: var(--ansi-bright-yellow); }
+.a12 { color: var(--ansi-bright-blue); }
+.a13 { color: var(--ansi-bright-magenta); }
+.a14 { color: var(--ansi-bright-cyan); }
+.a15 { color: var(--ansi-bright-white); }
+
+/* ── Section / screen heading ────────────────────────────────────────── */
+.screen-title {
+  color: var(--phosphor-bright);
+  font-size: 1.0rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-shadow: 0 0 8px var(--phosphor);
+  margin-bottom: 0.6rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--phosphor-dim);
+}
+
+.screen-subtitle {
+  color: var(--phosphor-dim);
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+/* ── Utility / misc ──────────────────────────────────────────────────── */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.support-signpost {
+  border: 1px solid #ff9900;
+  padding: 0.6rem 0.8rem;
+  margin: 0.5rem 0;
+  color: #ffcc66;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* ── Reduced-motion overrides ─────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .cursor {
     animation: none;
+    opacity: 1;
+  }
+  .crt::before,
+  .crt::after {
+    display: none;
+  }
+  /* Disable any CSS transitions */
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.001ms !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* ── Narrow / mobile ─────────────────────────────────────────────────── */
+@media (max-width: 540px) {
+  :root {
+    --base-size: 0.92rem;
+  }
+
+  .crt {
+    padding: 0.75rem 0.5rem 0.5rem;
+  }
+
+  .status-line,
+  .footer-line {
+    font-size: 0.72rem;
+    gap: 0.3rem 0.75rem;
+  }
+
+  .nav-list {
+    gap: 0.15rem 0.75rem;
+  }
+
+  .terminal {
+    max-width: 100%;
+  }
+
+  .bbs-btn,
+  .skip-btn {
+    min-height: var(--touch-min);
   }
 }
