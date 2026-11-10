@@ -1,0 +1,16 @@
+# OS noise
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editor noise
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# NOTE: .kiro/ is intentionally NOT ignored and must never be added here.
+# Kiroween 2026 submission rules require the /.kiro directory (specs,
+# steering, hooks) to be present and visible in this public repository —
+# ignoring it could disqualify the submission.

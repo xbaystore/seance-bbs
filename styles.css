@@ -1,0 +1,87 @@
+/* Séance BBS — placeholder shell styles.
+   Full CRT theme (scanlines, vignette, contrast mode) lands with the
+   implementation tasks in .kiro/specs/seance-bbs/tasks.md. */
+
+:root {
+  --phosphor: #33ff66;
+  --phosphor-dim: #1d9e42;
+  --screen-black: #020604;
+  --terminal-font: "Courier New", ui-monospace, Menlo, Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #000;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--terminal-font);
+  color: var(--phosphor);
+}
+
+.crt {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(ellipse at center, #06130a 0%, var(--screen-black) 75%);
+  padding: 1.5rem 1rem;
+}
+
+.status-line,
+.footer-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--phosphor-dim);
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.terminal {
+  flex: 1;
+  width: min(880px, 100%);
+  margin: 1.5rem auto;
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.transcript {
+  white-space: pre-wrap;
+  word-break: break-word;
+  text-shadow: 0 0 6px rgba(51, 255, 102, 0.55), 0 0 22px rgba(51, 255, 102, 0.18);
+}
+
+.transcript .line {
+  display: block;
+  min-height: 1.55em;
+}
+
+.transcript .final {
+  margin-top: 1.2em;
+  color: var(--phosphor);
+}
+
+.cursor {
+  display: inline-block;
+  animation: blink 1.06s steps(1) infinite;
+}
+
+@keyframes blink {
+  0%, 55% { opacity: 1; }
+  56%, 100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor {
+    animation: none;
+  }
+}
