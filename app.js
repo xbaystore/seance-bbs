@@ -1174,7 +1174,16 @@
       _appendLineFull({ text: text, cls: cls || "" });
     }
 
-    return { play: play, printLine: printLine };
+    /**
+     * Override the reduced-motion flag programmatically.
+     * Called by init() when a persisted manual preference exists.
+     * @param {boolean} val
+     */
+    function setReduceMotion(val) {
+      _reduceMotion = !!val;
+    }
+
+    return { play: play, printLine: printLine, setReduceMotion: setReduceMotion };
   })();
 
   /* ─────────────────────────────────────────────────────────────────────
@@ -1309,6 +1318,10 @@
   var Router = (function () {
     var _activeScreen = document.getElementById("active-screen");
     var _nav          = document.getElementById("bbs-nav");
+
+    /* Pending comfort signpost — set by new-thread/reply submit when
+     * the comfort blocklist fires; consumed and cleared by renderThread. */
+    var _pendingComfort = false;
 
     /* ── Shared chrome helpers ───────────────────────────────────── */
 
@@ -1688,6 +1701,14 @@
           s.posts.push(newPost);
         });
 
+        /* ── Ghost Engine evaluation (Req 6.1) — exactly once per new post ── */
+        var ghostResult = GhostEngine.evaluate(newPost, "post");
+        if (ghostResult && ghostResult.trigger === "comfort") {
+          /* Comfort blocklist matched — do NOT schedule a joke reply.
+           * Set the pending comfort flag so renderThread shows the signpost. */
+          _pendingComfort = true;
+        }
+
         /* Navigate to the new thread immediately (Req 3.4) */
         window.location.hash = "#/thread/" + encodeURIComponent(newPost.id);
       });
@@ -1765,6 +1786,24 @@
         '</section>';
 
       showNav();
+
+      /* ── 11.4  Comfort signpost — consume pending flag ── */
+      if (_pendingComfort) {
+        _pendingComfort = false;
+        var comfortEl = document.createElement("div");
+        comfortEl.className = "support-signpost";
+        comfortEl.setAttribute("role", "note");
+        comfortEl.innerHTML =
+          '<strong>A note from the board:</strong> '
+          + 'If you\'re going through something difficult, real support is available. '
+          + '<strong>988 Suicide &amp; Crisis Lifeline:</strong> call or text <strong>988</strong> (US). '
+          + '<strong>Crisis Text Line:</strong> text HOME to <strong>741741</strong>. '
+          + 'You don\'t have to be on a BBS alone.';
+        var threadPostsEl = _activeScreen.querySelector(".thread-posts");
+        if (threadPostsEl) {
+          threadPostsEl.parentNode.insertBefore(comfortEl, threadPostsEl.nextSibling);
+        }
+      }
 
       /* Render the reply form inline */
       _renderReplyForm(thread, board);
@@ -1844,6 +1883,12 @@
         Store.update(function (s) {
           s.posts.push(newReply);
         });
+
+        /* ── Ghost Engine evaluation (Req 6.1) — exactly once per new reply ── */
+        var replyGhostResult = GhostEngine.evaluate(newReply, "post");
+        if (replyGhostResult && replyGhostResult.trigger === "comfort") {
+          _pendingComfort = true;
+        }
 
         /* Re-render thread in place (Req 3.4 — immediate, no reload) */
         renderThread(thread.id);
@@ -2038,6 +2083,28 @@
             s.log.push(newEntry);
           });
 
+          /* ── Ghost Engine evaluation (Req 6.1) — exactly once per new log entry ── */
+          var logGhostResult = GhostEngine.evaluate(newEntry, "log");
+          if (logGhostResult && logGhostResult.trigger === "comfort") {
+            /* Comfort blocklist: show signpost, suppress joke reply */
+            renderLog(0);
+            /* Insert comfort signpost after re-render */
+            var logListEl = document.getElementById("log-list");
+            if (logListEl) {
+              var signpost = document.createElement("div");
+              signpost.className = "support-signpost";
+              signpost.setAttribute("role", "note");
+              signpost.innerHTML =
+                '<strong>A note from the board:</strong> '
+                + 'If you\'re going through something difficult, real support is available. '
+                + '<strong>988 Suicide &amp; Crisis Lifeline:</strong> call or text <strong>988</strong> (US). '
+                + '<strong>Crisis Text Line:</strong> text HOME to <strong>741741</strong>. '
+                + 'You don\'t have to be on a BBS alone.';
+              logListEl.parentNode.insertBefore(signpost, logListEl);
+            }
+            return;
+          }
+
           /* Re-render at page 0 so the new entry is visible (newest-first) */
           renderLog(0);
 
@@ -2146,7 +2213,176 @@
     }
 
     function renderSettings() {
-      _renderPlaceholder("SETTINGS", "Task 12 — settings implementation");
+      /* ─────────────────────────────────────────────────────────────
+         12.1  Settings screen
+         • Readable-contrast toggle — persisted in state.meta.preferences
+         • Change handle — delegates to HandlePrompt.change()
+         • Reset board — two-step explicit confirmation
+         12.2  Reduced-motion preference
+         • Default follows OS (prefers-reduced-motion media query)
+         • Manual override stored in state.meta.preferences.reducedMotion
+         ───────────────────────────────────────────────────────────── */
+      var state = Store.get();
+      var prefs = state.meta.preferences || {};
+
+      /* Determine reduced-motion status */
+      var osReducedMotion = !!(window.matchMedia &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+      var rmOverride = prefs.reducedMotion; // null | true | false
+      var rmActive   = (rmOverride !== null && rmOverride !== undefined)
+        ? rmOverride : osReducedMotion;
+
+      /* Contrast toggle label */
+      var contrastOn = !!prefs.contrast;
+      var contrastLabel = contrastOn
+        ? "[ON]  READABLE CONTRAST — click to disable"
+        : "[OFF] READABLE CONTRAST — click to enable";
+
+      /* Reduced-motion toggle label */
+      var rmLabel = rmActive
+        ? "[ON]  REDUCED MOTION — click to disable"
+        : "[OFF] REDUCED MOTION — click to enable";
+      var rmNote = (rmOverride === null || rmOverride === undefined)
+        ? "(following OS setting" + (osReducedMotion ? ": reduced" : ": full") + ")"
+        : "(manual override)";
+
+      _activeScreen.innerHTML =
+        _noticeHtml() +
+        '<section class="screen-section" aria-label="Settings">' +
+        '<h1 class="screen-title">SETTINGS</h1>' +
+        '<p class="line line--dim">Configure your terminal preferences.</p>' +
+        '<hr class="post-divider" aria-hidden="true" />' +
+
+        '<h2 class="screen-subtitle">DISPLAY</h2>' +
+        '<div class="settings-row">' +
+        '<button type="button" class="menu-btn settings-toggle" id="contrast-toggle">'
+        + escapeHtml(contrastLabel) + '</button>' +
+        '<span class="line line--dim settings-desc">'
+        + 'Removes scanlines, vignette, and glow. Improves legibility.</span>' +
+        '</div>' +
+
+        '<div class="settings-row">' +
+        '<button type="button" class="menu-btn settings-toggle" id="motion-toggle">'
+        + escapeHtml(rmLabel) + '</button>' +
+        '<span class="line line--dim settings-desc">'
+        + escapeHtml(rmNote) + ' — disables typing animation and flicker.</span>' +
+        '</div>' +
+
+        '<hr class="post-divider" aria-hidden="true" />' +
+        '<h2 class="screen-subtitle">IDENTITY</h2>' +
+        '<div class="settings-row">' +
+        '<button type="button" class="menu-btn" id="change-handle-btn">[H] CHANGE HANDLE</button>' +
+        '<span class="line line--dim settings-desc">'
+        + 'Current handle: <strong>'
+        + escapeHtml(state.meta.handle || "(none)")
+        + '</strong></span>' +
+        '</div>' +
+
+        '<hr class="post-divider" aria-hidden="true" />' +
+        '<h2 class="screen-subtitle">BOARD MANAGEMENT</h2>' +
+        '<div class="settings-row">' +
+        '<button type="button" class="bbs-btn bbs-btn--danger" id="reset-board-btn">[!] RESET BOARD</button>' +
+        '<span class="line line--dim settings-desc">'
+        + 'Wipes all posts and log entries; restores seed content. Cannot be undone.</span>' +
+        '</div>' +
+        '<div id="reset-confirm-area"></div>' +
+
+        '<hr class="post-divider" aria-hidden="true" />' +
+        '<p class="line line--dim back-link"><a class="menu-link" href="#/">&larr; BACK TO MENU</a></p>' +
+        '</section>';
+
+      showNav();
+
+      /* ── Contrast toggle ── */
+      var contrastBtn = document.getElementById("contrast-toggle");
+      if (contrastBtn) {
+        contrastBtn.addEventListener("click", function () {
+          Store.update(function (s) {
+            s.meta.preferences.contrast = !s.meta.preferences.contrast;
+          });
+          var root = document.getElementById("crt-root");
+          if (Store.get().meta.preferences.contrast) {
+            if (root) { root.classList.add("contrast-mode"); }
+          } else {
+            if (root) { root.classList.remove("contrast-mode"); }
+          }
+          /* Re-render settings to reflect new state */
+          renderSettings();
+        });
+      }
+
+      /* ── Reduced-motion toggle ── */
+      var motionBtn = document.getElementById("motion-toggle");
+      if (motionBtn) {
+        motionBtn.addEventListener("click", function () {
+          Store.update(function (s) {
+            /* Cycle: null→!osRM → override → toggle override */
+            var currentOverride = s.meta.preferences.reducedMotion;
+            if (currentOverride === null || currentOverride === undefined) {
+              /* First manual override: invert the OS default */
+              s.meta.preferences.reducedMotion = !osReducedMotion;
+            } else {
+              s.meta.preferences.reducedMotion = !currentOverride;
+            }
+          });
+          renderSettings();
+        });
+      }
+
+      /* ── Change handle ── */
+      var changeHandleBtn = document.getElementById("change-handle-btn");
+      if (changeHandleBtn) {
+        changeHandleBtn.addEventListener("click", function () {
+          HandlePrompt.change(function () {
+            _updateStatusLine();
+            renderSettings();
+          });
+        });
+      }
+
+      /* ── Reset board (two-step confirmation) ── */
+      var resetBtn = document.getElementById("reset-board-btn");
+      if (resetBtn) {
+        resetBtn.addEventListener("click", function () {
+          var confirmArea = document.getElementById("reset-confirm-area");
+          if (!confirmArea) { return; }
+
+          /* Show confirmation prompt */
+          confirmArea.innerHTML =
+            '<div class="reset-confirm" role="alert">' +
+            '<p class="line line--warn">⚠ THIS WILL ERASE ALL POSTS, LOG ENTRIES, AND YOUR HANDLE.</p>' +
+            '<p class="line line--warn">Seed content will be restored. This cannot be undone.</p>' +
+            '<div class="form-actions">' +
+            '<button type="button" class="bbs-btn bbs-btn--danger" id="reset-confirm-yes">[CONFIRM] YES, RESET EVERYTHING</button>' +
+            '<button type="button" class="menu-btn" id="reset-confirm-no">[X] CANCEL</button>' +
+            '</div>' +
+            '</div>';
+
+          var yesBtn = document.getElementById("reset-confirm-yes");
+          var noBtn  = document.getElementById("reset-confirm-no");
+
+          if (yesBtn) {
+            yesBtn.addEventListener("click", function () {
+              /* Req 7.5 — clear versioned key and re-seed */
+              Store.reset(SeedData.seed);
+              /* Remove contrast class if preference was reset */
+              var root = document.getElementById("crt-root");
+              if (root) { root.classList.remove("contrast-mode"); }
+              /* Update status line (handle was cleared) */
+              _updateStatusLine();
+              /* Navigate to menu */
+              window.location.hash = "#/";
+              renderMenu();
+            });
+          }
+
+          if (noBtn) {
+            noBtn.addEventListener("click", function () {
+              confirmArea.innerHTML = "";
+            });
+          }
+        });
+      }
     }
 
     /* ── 404 ─────────────────────────────────────────────────────── */
@@ -2230,17 +2466,253 @@
 
   /* ─────────────────────────────────────────────────────────────────────
      6. GHOST ENGINE
-     SysOp Ghost reply logic — full implementation in task 11.
-     Stub only.
+     SysOp Ghost reply logic — full implementation (task 11).
+
+     Invariants enforced:
+       • At most one reply per item (ghostRepliedTo set in state.meta)
+       • Never replies to its own messages (item.ghost === true)
+       • At least 10 minutes between ghost posts (lastGhostReplyAt)
+       • At most 3 ghost replies per session (_sessionReplies, in-memory)
+       • Comfort blocklist short-circuits all trigger evaluation
      ───────────────────────────────────────────────────────────────────── */
   var GhostEngine = (function () {
-    // Session-level counter; resets on page reload (by design)
+
+    /* ── Session-level counter (resets on reload — by design) ───── */
     var _sessionReplies = 0;
     var MAX_SESSION     = 3;
 
-    function evaluate(/* item */) {
-      // Full trigger evaluation in task 11
+    /* ── Timing constants ────────────────────────────────────────── */
+    var MIN_DELAY_MS    = 20 * 1000;   /* 20 seconds */
+    var MAX_DELAY_MS    = 90 * 1000;   /* 90 seconds */
+    var COOLDOWN_MS     = 10 * 60 * 1000; /* 10 minutes */
+
+    var GHOST_HANDLE    = "The SysOp Ghost";
+
+    /* ── 11.4  Comfort / crisis blocklist ────────────────────────── */
+    /*
+     * Words / phrases that short-circuit ALL ghost replies.
+     * Requirement 6.6: show a plain-language support signpost instead;
+     * do not schedule any joke reply.
+     */
+    var COMFORT_BLOCKLIST = [
+      "suicide", "suicidal", "kill myself", "want to die", "self harm",
+      "self-harm", "cutting myself", "hurt myself", "end my life",
+      "not worth living", "overdose", "crisis line", "988"
+    ];
+
+    /**
+     * Test whether text contains any comfort-blocklist term.
+     * @param {string} text
+     * @returns {boolean}
+     */
+    function _isComfort(text) {
+      var lower = text.toLowerCase();
+      for (var i = 0; i < COMFORT_BLOCKLIST.length; i++) {
+        if (lower.indexOf(COMFORT_BLOCKLIST[i]) !== -1) { return true; }
+      }
       return false;
+    }
+
+    /* ── Summoning words (greeting pool) ────────────────────────── */
+    var SUMMONING = ["ghost", "sysop", "haunt", "séance", "seance",
+                     "anyone here", "hello?"];
+
+    /* ── Help-desk keywords (helpful pool) ──────────────────────── */
+    var HELP_WORDS = ["help", "how do i", "stuck"];
+
+    /* ── Witching hour ────────────────────────────────────────────
+     * Posts created between 00:00 and 03:59 local time trigger spooky.
+     */
+    function _isWitchingHour(isoDate) {
+      var h = new Date(isoDate).getHours();
+      return h >= 0 && h <= 3;
+    }
+
+    /* ── Pool selection ──────────────────────────────────────────── */
+
+    /**
+     * Pick a random item from an array.
+     * @param {Array} arr
+     * @returns {*}
+     */
+    function _pick(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    /**
+     * Determine which pool to reply from, or return null if no trigger fires.
+     * Trigger evaluation order (design.md §GhostEngine):
+     *   1. Comfort blocklist  → handled upstream; never reaches here
+     *   2. Summoning words    → greeting pool
+     *   3. Help desk          → helpful pool
+     *   4. Witching hour      → spooky pool
+     *   5. 15% chance         → spooky pool
+     *   For log entries, use the log pool instead of greeting/spooky.
+     *
+     * @param {Object}  item
+     * @param {string}  type  — "post" | "log"
+     * @returns {string|null} pool name, or null if no trigger
+     */
+    function _selectPool(item, type) {
+      var text  = (item.body || item.message || "").toLowerCase();
+      var pools = SeedData.GHOST_POOLS;
+
+      /* Summoning words → greeting (or log pool for log entries) */
+      for (var si = 0; si < SUMMONING.length; si++) {
+        if (text.indexOf(SUMMONING[si]) !== -1) {
+          return type === "log" ? "log" : "greeting";
+        }
+      }
+
+      /* Help desk → helpful */
+      for (var hi = 0; hi < HELP_WORDS.length; hi++) {
+        if (text.indexOf(HELP_WORDS[hi]) !== -1) {
+          return "helpful";
+        }
+      }
+
+      /* Witching hour → spooky (or log pool for log entries) */
+      if (_isWitchingHour(item.createdAt)) {
+        return type === "log" ? "log" : "spooky";
+      }
+
+      /* 15% chance */
+      if (Math.random() < 0.15) {
+        return type === "log" ? "log" : "spooky";
+      }
+
+      return null;
+    }
+
+    /* ── Rate-limit checks ───────────────────────────────────────── */
+
+    /**
+     * Check all hard rate limits.
+     * Returns false if any limit is exceeded (ghost should NOT reply).
+     * @param {Object} item
+     * @returns {boolean} true = may reply, false = blocked
+     */
+    function _rateLimitsOk(item) {
+      /* 1. Never reply to items authored by the ghost itself */
+      if (item.ghost === true) { return false; }
+
+      /* 2. At most one reply per target item */
+      var state = Store.get();
+      var alreadyReplied = state.meta.ghostRepliedTo || [];
+      for (var i = 0; i < alreadyReplied.length; i++) {
+        if (alreadyReplied[i] === item.id) { return false; }
+      }
+
+      /* 3. At most 3 ghost replies per session */
+      if (_sessionReplies >= MAX_SESSION) { return false; }
+
+      /* 4. ≥10 minutes between ghost replies */
+      if (state.meta.lastGhostReplyAt) {
+        var lastMs  = new Date(state.meta.lastGhostReplyAt).getTime();
+        var nowMs   = Date.now();
+        if (nowMs - lastMs < COOLDOWN_MS) { return false; }
+      }
+
+      return true;
+    }
+
+    /* ── Public: evaluate ────────────────────────────────────────── */
+
+    /**
+     * Evaluate trigger rules for a newly-created item (post or log entry).
+     * Called exactly once per new post or log entry immediately after save.
+     *
+     * @param {Object} item   — the saved post or log entry object
+     * @param {string} type   — "post" | "log"
+     * @returns {{ trigger: string } | false}
+     *   Returns { trigger: "comfort" } if the comfort blocklist matched.
+     *   Returns { trigger: poolName } if a ghost reply was scheduled.
+     *   Returns false if no trigger fired (or rate limits blocked it).
+     */
+    function evaluate(item, type) {
+      var text = (item.body || item.message || "");
+
+      /* ── 11.4  Comfort blocklist (short-circuits EVERYTHING) ── */
+      if (_isComfort(text)) {
+        /* The screen renderer handles showing the support signpost.
+         * We just return the signal — no ghost reply is ever scheduled. */
+        return { trigger: "comfort" };
+      }
+
+      /* ── Rate limits ── */
+      if (!_rateLimitsOk(item)) { return false; }
+
+      /* ── Trigger evaluation ── */
+      var poolName = _selectPool(item, type || "post");
+      if (!poolName) { return false; }
+
+      /* ── Schedule the reply after a random 20–90 s delay ── */
+      var delay = MIN_DELAY_MS + Math.floor(Math.random() * (MAX_DELAY_MS - MIN_DELAY_MS + 1));
+
+      /* Bump session counter eagerly so concurrent triggers don't
+       * each pass the ≤3 check before any reply fires. */
+      _sessionReplies++;
+
+      window.setTimeout(function () {
+        /* Re-check limits at fire time (state may have changed) */
+        var state = Store.get();
+        var alreadyReplied = state.meta.ghostRepliedTo || [];
+        var stillOk = true;
+
+        /* Item already replied to? */
+        for (var i = 0; i < alreadyReplied.length; i++) {
+          if (alreadyReplied[i] === item.id) { stillOk = false; break; }
+        }
+        /* Cooldown: re-check at fire time */
+        if (stillOk && state.meta.lastGhostReplyAt) {
+          var lastMs = new Date(state.meta.lastGhostReplyAt).getTime();
+          if (Date.now() - lastMs < COOLDOWN_MS) { stillOk = false; }
+        }
+
+        if (!stillOk) {
+          /* Timer fired but limits now prevent posting — undo eager count */
+          _sessionReplies = Math.max(0, _sessionReplies - 1);
+          return;
+        }
+
+        /* Post the reply and update tracking */
+        var pools = SeedData.GHOST_POOLS;
+        var pool  = pools[poolName] || pools.spooky;
+        var text2 = _pick(pool);
+        var now   = new Date().toISOString();
+
+        Store.update(function (s) {
+          if (type === "post") {
+            s.posts.push({
+              id:        genId(),
+              boardId:   item.boardId,
+              threadId:  item.threadId,
+              parentId:  item.id,
+              subject:   null,
+              author:    GHOST_HANDLE,
+              body:      text2,
+              createdAt: now,
+              ghost:     true
+            });
+          } else {
+            s.log.push({
+              id:        genId(),
+              author:    GHOST_HANDLE,
+              message:   text2,
+              createdAt: now,
+              ghost:     true
+            });
+          }
+          if (!Array.isArray(s.meta.ghostRepliedTo)) {
+            s.meta.ghostRepliedTo = [];
+          }
+          s.meta.ghostRepliedTo.push(item.id);
+          s.meta.lastGhostReplyAt = now;
+        });
+        /* _sessionReplies already incremented before the timer fired */
+      }, delay);
+
+      return { trigger: poolName };
     }
 
     return { evaluate: evaluate };
@@ -2259,6 +2731,14 @@
     // 2. Apply persisted contrast preference
     if (state.meta.preferences.contrast) {
       document.getElementById("crt-root").classList.add("contrast-mode");
+    }
+
+    // 2b. Apply persisted reduced-motion preference override (Req 8.3 / task 12.2)
+    // null = follow OS (already captured by BootSequence._reduceMotion);
+    // true/false = manual override — tell BootSequence before play() fires.
+    var rmPref = state.meta.preferences.reducedMotion;
+    if (rmPref !== null && rmPref !== undefined) {
+      BootSequence.setReduceMotion(rmPref);
     }
 
     // 3. Update status line with handle if returning caller

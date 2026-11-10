@@ -652,3 +652,718 @@ body {
     min-height: var(--touch-min);
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Task 6-7 additions: Router screens, boards, threads, posts, forms
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Generic screen section ─────────────────────────────────────────── */
+.screen-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* ── Generic line + dim/warn inside active screen ───────────────────── */
+.line {
+  display: block;
+  min-height: 1.4em;
+}
+
+.line--dim {
+  color: var(--phosphor-dim);
+}
+
+.line--bright {
+  color: var(--phosphor-bright);
+}
+
+.line--warn {
+  color: var(--sysop-color);
+}
+
+.back-link {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--phosphor-dim);
+}
+
+/* ── Menu screen ────────────────────────────────────────────────────── */
+.menu-nav {
+  margin: 0.75rem 0;
+}
+
+.menu-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.menu-link {
+  color: var(--phosphor);
+  text-decoration: none;
+  letter-spacing: 0.08em;
+  min-height: var(--touch-min);
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.3rem;
+  transition: color 0.15s;
+}
+
+.menu-link:hover,
+.menu-link:focus-visible {
+  color: var(--phosphor-bright);
+  text-shadow: 0 0 6px var(--phosphor);
+}
+
+.menu-link:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: 2px;
+}
+
+/* ── Board list ─────────────────────────────────────────────────────── */
+.board-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.board-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto auto;
+  row-gap: 0.1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--phosphor-faint);
+  min-height: var(--touch-min);
+}
+
+.board-row:last-child {
+  border-bottom: none;
+}
+
+.board-link {
+  color: var(--phosphor-bright);
+  text-decoration: none;
+  font-size: 0.95rem;
+  letter-spacing: 0.1em;
+  min-height: var(--touch-min);
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+
+.board-link:hover,
+.board-link:focus-visible {
+  color: #fff;
+  text-shadow: 0 0 8px var(--phosphor);
+}
+
+.board-link:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: 2px;
+}
+
+.board-name {
+  letter-spacing: 0.12em;
+}
+
+.board-desc {
+  color: var(--phosphor-dim);
+  font-size: 0.85rem;
+  display: block;
+}
+
+.board-meta {
+  color: var(--phosphor-faint);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  display: block;
+}
+
+/* ── Thread list ────────────────────────────────────────────────────── */
+.thread-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0.5rem 0;
+}
+
+.thread-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3rem 1rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--phosphor-faint);
+  min-height: var(--touch-min);
+}
+
+.thread-row:last-child {
+  border-bottom: none;
+}
+
+.thread-row--empty {
+  color: var(--phosphor-dim);
+}
+
+.thread-link {
+  color: var(--phosphor);
+  text-decoration: none;
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: break-word;
+  min-height: var(--touch-min);
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+
+.thread-link:hover,
+.thread-link:focus-visible {
+  color: var(--phosphor-bright);
+  text-shadow: 0 0 6px var(--phosphor);
+}
+
+.thread-link:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: 2px;
+}
+
+.thread-meta {
+  color: var(--phosphor-dim);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* ── Screen actions bar ─────────────────────────────────────────────── */
+.screen-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0.25rem;
+}
+
+.menu-btn {
+  background: transparent;
+  border: 1px solid var(--phosphor);
+  color: var(--phosphor);
+  font-family: var(--terminal-font);
+  font-size: var(--base-size);
+  letter-spacing: 0.08em;
+  padding: 0.3rem 0.8rem;
+  cursor: pointer;
+  min-height: var(--touch-min);
+  min-width: var(--touch-min);
+  transition: color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.menu-btn:hover,
+.menu-btn:focus-visible {
+  background: var(--phosphor-faint);
+  color: var(--phosphor-bright);
+  box-shadow: 0 0 8px var(--phosphor);
+}
+
+.menu-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.menu-btn--cancel {
+  border-color: var(--phosphor-dim);
+  color: var(--phosphor-dim);
+}
+
+.menu-btn--cancel:hover,
+.menu-btn--cancel:focus-visible {
+  border-color: var(--phosphor);
+  color: var(--phosphor);
+  background: var(--phosphor-faint);
+}
+
+/* ── Handle display inside a post ───────────────────────────────────── */
+.handle {
+  color: var(--phosphor);
+  font-weight: bold;
+}
+
+.handle--ghost {
+  color: var(--sysop-color);
+  text-shadow: 0 0 5px var(--sysop-dim);
+}
+
+/* ── Thread view — posts ────────────────────────────────────────────── */
+.thread-posts {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0.5rem 0;
+}
+
+article.post {
+  border-left: 2px solid var(--phosphor-faint);
+  padding: 0.6rem 0 0.6rem 1rem;
+  margin: 0;
+}
+
+article.post + hr.post-divider {
+  border: none;
+  border-top: 1px dashed var(--phosphor-faint);
+  margin: 0;
+}
+
+article.post--ghost {
+  border-left-color: var(--sysop-color);
+  background: rgba(255, 153, 0, 0.03);
+}
+
+.post-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-bottom: 0.4rem;
+}
+
+.post-subject {
+  color: var(--phosphor-bright);
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-shadow: 0 0 6px var(--phosphor);
+  font-weight: bold;
+  margin-bottom: 0.2rem;
+}
+
+.post-meta {
+  color: var(--phosphor-dim);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+}
+
+.post-ref {
+  color: var(--phosphor-dim);
+  font-size: 0.78rem;
+}
+
+.post-ref:hover,
+.post-ref:focus-visible {
+  color: var(--phosphor);
+}
+
+.post-body {
+  color: var(--phosphor);
+}
+
+.post-pre {
+  font-family: var(--terminal-font);
+  font-size: var(--base-size);
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: var(--line-height);
+  margin: 0;
+}
+
+/* ── Reply section ──────────────────────────────────────────────────── */
+.reply-section {
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--phosphor-dim);
+  padding-top: 0.75rem;
+}
+
+.reply-heading {
+  color: var(--phosphor-bright);
+  font-size: 0.9rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+/* ── Post / reply forms ─────────────────────────────────────────────── */
+.post-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-width: 72ch;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.form-label {
+  color: var(--phosphor-dim);
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.form-input,
+.form-textarea {
+  background: var(--screen-bg);
+  border: 1px solid var(--phosphor-dim);
+  color: var(--phosphor);
+  font-family: var(--terminal-font);
+  font-size: var(--base-size);
+  padding: 0.4rem 0.6rem;
+  caret-color: var(--phosphor-bright);
+  resize: vertical;
+  min-height: var(--touch-min);
+  width: 100%;
+  transition: border-color 0.15s;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--phosphor);
+  box-shadow: var(--focus-ring);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: var(--phosphor-faint);
+}
+
+.form-textarea {
+  min-height: 10rem;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.char-count {
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Tasks 8–9 additions: séance log, art gallery, art view
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Handle form (task 4b) ───────────────────────────────────────────── */
+.handle-prompt {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 60ch;
+}
+
+.handle-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.handle-label {
+  color: var(--phosphor-dim);
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+.handle-input {
+  background: var(--screen-bg);
+  border: 1px solid var(--phosphor-dim);
+  color: var(--phosphor);
+  font-family: var(--terminal-font);
+  font-size: var(--base-size);
+  padding: 0.3rem 0.5rem;
+  caret-color: var(--phosphor-bright);
+  min-height: var(--touch-min);
+  min-width: 20ch;
+  flex: 1;
+  transition: border-color 0.15s;
+}
+
+.handle-input:focus {
+  outline: none;
+  border-color: var(--phosphor);
+  box-shadow: var(--focus-ring);
+}
+
+.handle-submit {
+  background: transparent;
+  border: 1px solid var(--phosphor);
+  color: var(--phosphor);
+  font-family: var(--terminal-font);
+  font-size: var(--base-size);
+  letter-spacing: 0.08em;
+  padding: 0.3rem 0.8rem;
+  cursor: pointer;
+  min-height: var(--touch-min);
+  min-width: var(--touch-min);
+  transition: color 0.15s, background 0.15s;
+}
+
+.handle-submit:hover,
+.handle-submit:focus-visible {
+  background: var(--phosphor-faint);
+  color: var(--phosphor-bright);
+  box-shadow: 0 0 8px var(--phosphor);
+}
+
+.handle-submit:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* ── Séance Log (task 8) ─────────────────────────────────────────────── */
+.log-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0.5rem 0;
+}
+
+.log-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.5rem 0 0.5rem 1rem;
+  border-left: 2px solid var(--phosphor-faint);
+  border-bottom: 1px dashed var(--phosphor-faint);
+  min-height: var(--touch-min);
+}
+
+.log-row:last-child {
+  border-bottom: none;
+}
+
+.log-row--ghost {
+  border-left-color: var(--sysop-color);
+  background: rgba(255, 153, 0, 0.03);
+}
+
+.log-row--empty {
+  border-left: none;
+  padding-left: 0;
+  color: var(--phosphor-dim);
+}
+
+.log-entry-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3rem 1rem;
+  font-size: 0.8rem;
+  color: var(--phosphor-dim);
+}
+
+.log-time {
+  color: var(--phosphor-faint);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+}
+
+.log-entry-body {
+  color: var(--phosphor);
+  font-size: 0.95rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Pagination bar */
+.log-pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin: 0.75rem 0;
+}
+
+.log-pager-info {
+  flex: 1;
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+.menu-btn--disabled {
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* Log entry textarea (shorter than a post textarea) */
+.form-textarea--log {
+  min-height: 5rem;
+  resize: vertical;
+}
+
+/* Log form section */
+.log-form-section {
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--phosphor-dim);
+  padding-top: 0.75rem;
+}
+
+/* ── Art gallery index (task 9.1) ────────────────────────────────────── */
+.art-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0.5rem 0;
+}
+
+.art-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3rem 1rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--phosphor-faint);
+  min-height: var(--touch-min);
+}
+
+.art-row:last-child {
+  border-bottom: none;
+}
+
+.art-row--empty {
+  color: var(--phosphor-dim);
+}
+
+.art-link {
+  color: var(--phosphor);
+  text-decoration: none;
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: break-word;
+  min-height: var(--touch-min);
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+
+.art-link:hover,
+.art-link:focus-visible {
+  color: var(--phosphor-bright);
+  text-shadow: 0 0 6px var(--phosphor);
+}
+
+.art-link:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: 2px;
+}
+
+.art-meta {
+  color: var(--phosphor-dim);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* ── Art piece view (tasks 9.1–9.2) ─────────────────────────────────── */
+.art-section {
+  gap: 0.6rem;
+}
+
+/*
+ * Horizontal-scroll wrapper (Req 5.5):
+ * Only the art block scrolls horizontally; the surrounding layout is
+ * unaffected.  tabindex="0" makes the region keyboard-focusable.
+ */
+.art-scroll-wrapper {
+  overflow-x: auto;
+  max-width: 100%;
+  border: 1px solid var(--phosphor-faint);
+  padding: 0.5rem;
+  margin: 0.25rem 0;
+  /* Allow focus outline to be visible */
+  outline-offset: 2px;
+}
+
+.art-scroll-wrapper:focus-visible {
+  outline: 2px solid var(--phosphor);
+}
+
+.art-pre {
+  font-family: var(--terminal-font);
+  font-size: 0.88rem;
+  line-height: 1.3;
+  /* Preserve ALL whitespace and line breaks exactly (Req 5.2) */
+  white-space: pre;
+  color: var(--phosphor);
+  /* Prevent text from wrapping inside the art block */
+  overflow-wrap: normal;
+  word-break: normal;
+  /* Let the block be as wide as it needs to be; wrapper handles scroll */
+  min-width: max-content;
+  margin: 0;
+}
+
+/* ANSI 16-color palette classes used by art renderer after HTML-escaping
+   (Req 5.3: rendered after escaping, never raw HTML from art source)    */
+.ansi-0  { color: var(--ansi-black); }
+.ansi-1  { color: var(--ansi-red); }
+.ansi-2  { color: var(--ansi-green); }
+.ansi-3  { color: var(--ansi-yellow); }
+.ansi-4  { color: var(--ansi-blue); }
+.ansi-5  { color: var(--ansi-magenta); }
+.ansi-6  { color: var(--ansi-cyan); }
+.ansi-7  { color: var(--ansi-white); }
+.ansi-8  { color: var(--ansi-bright-black); }
+.ansi-9  { color: var(--ansi-bright-red); }
+.ansi-10 { color: var(--ansi-bright-green); }
+.ansi-11 { color: var(--ansi-bright-yellow); }
+.ansi-12 { color: var(--ansi-bright-blue); }
+.ansi-13 { color: var(--ansi-bright-magenta); }
+.ansi-14 { color: var(--ansi-bright-cyan); }
+.ansi-15 { color: var(--ansi-bright-white); }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Task 12 additions: Settings screen
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Settings rows ───────────────────────────────────────────────────── */
+.settings-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.5rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px dashed var(--phosphor-faint);
+}
+
+.settings-row:last-of-type {
+  border-bottom: none;
+}
+
+.settings-toggle {
+  min-width: 36ch;
+}
+
+.settings-desc {
+  color: var(--phosphor-dim);
+  font-size: 0.85rem;
+  flex: 1;
+  min-width: 20ch;
+}
+
+/* ── Reset confirmation area ─────────────────────────────────────────── */
+.reset-confirm {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid #ff4444;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}

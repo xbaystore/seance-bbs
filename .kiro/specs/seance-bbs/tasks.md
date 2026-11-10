@@ -101,27 +101,27 @@ checks, and only then continue.
     scrolls internally
   - _Requirements: 3, 4, 5, 7 (partial)_
 
-- [ ] 11. SysOp Ghost engine
-  - [ ] 11.1 Implement trigger evaluation (comfort blocklist first,
+- [x] 11. SysOp Ghost engine
+  - [x] 11.1 Implement trigger evaluation (comfort blocklist first,
     summoning words, help desk, witching hour, 15% chance) run exactly
     once per new post/entry
-  - [ ] 11.2 Author the reply pools (greeting / helpful / spooky / log,
+  - [x] 11.2 Author the reply pools (greeting / helpful / spooky / log,
     ~10 lines each), spooky-but-friendly, no occult instructions
-  - [ ] 11.3 Implement scheduling (20–90 s in-app delay), posting as
+  - [x] 11.3 Implement scheduling (20–90 s in-app delay), posting as
     "The SysOp Ghost" with SYSOP tag, and the hard rate limits: once per
     item, never to itself, ≥10 min cooldown, ≤3 per session
-  - [ ] 11.4 Implement the comfort path: blocklist matches show the
+  - [x] 11.4 Implement the comfort path: blocklist matches show the
     plain-language support signpost outside the ghost fiction, and no
     joke reply is ever scheduled
-  - [ ] 11.5 Verify invariants from design.md: ghost uniqueness, ghost
+  - [x] 11.5 Verify invariants from design.md: ghost uniqueness, ghost
     budget, and no ghost-to-ghost replies across a scripted posting spree
   - _Requirements: 6.1–6.6_
 
-- [ ] 12. Settings, contrast mode, and reset
-  - [ ] 12.1 Settings screen: readable-contrast toggle (removes scanlines/
+- [x] 12. Settings, contrast mode, and reset
+  - [x] 12.1 Settings screen: readable-contrast toggle (removes scanlines/
     flicker/vignette, persists preference), change handle, reset board
     with explicit confirmation
-  - [ ] 12.2 Honor `prefers-reduced-motion` by default on first run;
+  - [x] 12.2 Honor `prefers-reduced-motion` by default on first run;
     persist any manual override
   - _Requirements: 8.2, 8.3, 7.5, 2.6_
 
