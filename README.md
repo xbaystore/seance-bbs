@@ -7,7 +7,7 @@ modern web app — built for **Kiroween 2026** (AWS Kiro's hackathon on
 Devpost) in the **Resurrection** category. You dial in through a simulated
 14.4k modem connect sequence, pick a caller handle, and step onto a
 phosphor-green terminal board that has been running, unattended, since
-1997. The SysOp never left. He's just… no longer alive. He still answers
+1994. The SysOp never left. He's just… no longer alive. He still answers
 posts, though. Sometimes.
 
 No servers were harmed — or used: the entire board runs in your browser.

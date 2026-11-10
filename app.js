@@ -6,8 +6,8 @@
      1. Utilities
      2. Store          — localStorage persistence layer
      3. SeedData       — first-run boards, threads, log, art, ghost pools
-     4. BootSequence   — dial-up ritual (stubbed; full impl in task 4)
-     5. Router/Screens — hash routing & screen rendering (task 6+)
+     4. BootSequence   — dial-up ritual with typewriter rendering, skip, redial, and reduced-motion support
+     5. Router/Screens — hash routing & all screen renderers
      6. GhostEngine    — SysOp Ghost reply logic (task 11)
      7. Init           — wires everything together
    ═══════════════════════════════════════════════════════════════════════ */
@@ -569,14 +569,10 @@
     ];
 
     /*
-     * SEED_ART — gallery metadata and placeholder line arrays.
-     * The final artwork content is authored in task 9.3.
+     * SEED_ART — gallery metadata and art lines.
      * palette: true  → lines may contain internal color-span markup
      *                   that the art renderer converts to ANSI CSS classes.
      * palette: false → plain monochrome ASCII, no span processing needed.
-     *
-     * Lines arrays here are intentional stubs so the gallery can display
-     * "coming soon" placeholders until task 9.3 fills them in.
      */
     var SEED_ART = [
       {
@@ -1300,17 +1296,17 @@
 
   /* ─────────────────────────────────────────────────────────────────────
      5. ROUTER / SCREENS
-     Hash router (task 6.1) and all screen renderers (tasks 6.2, 7.1-7.3).
+     Hash router and all screen renderers.
 
      Routes:
        #/              → main menu
        #/boards        → board list
        #/board/:id     → thread list for a board
        #/thread/:id    → thread view + reply form
-       #/log           → séance log (placeholder, task 8)
-       #/gallery       → art gallery index (placeholder, task 9)
-       #/art/:id       → single art piece (placeholder, task 9)
-       #/settings      → settings (placeholder, task 12)
+       #/log           → séance log (guestbook)
+       #/gallery       → art gallery index
+       #/art/:id       → single art piece
+       #/settings      → settings
        anything else   → 404 — CARRIER LOST
 
      All user content MUST pass through escapeHtml() before interpolation.
@@ -1899,19 +1895,6 @@
           newPostEl.scrollIntoView({ behavior: "smooth", block: "start" });
         }
       });
-    }
-
-    /* ── Placeholder screens for tasks 8, 9, 12 ─────────────────── */
-
-    function _renderPlaceholder(title, routeHint) {
-      _activeScreen.innerHTML =
-        _noticeHtml() +
-        '<section class="screen-section" aria-label="' + escapeHtml(title) + '">' +
-        '<h1 class="screen-title">' + escapeHtml(title) + '</h1>' +
-        '<p class="line line--dim">[ ' + escapeHtml(routeHint) + ' — coming soon ]</p>' +
-        '<p class="line line--dim back-link"><a class="menu-link" href="#/">&larr; BACK TO MENU</a></p>' +
-        '</section>';
-      showNav();
     }
 
     /* ── 8.1  Séance Log (guestbook) ────────────────────────────── */

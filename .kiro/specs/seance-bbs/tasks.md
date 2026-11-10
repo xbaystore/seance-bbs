@@ -129,7 +129,7 @@ checks, and only then continue.
   - [ ] 13.1 Full manual checklist from design.md (fresh run, persistence,
     corrupt-state recovery, keyboard pass, reduced motion, contrast,
     mobile) executed start to finish without a defect
-  - [ ] 13.2 README accuracy pass: features list matches the shipped app,
+  - [x] 13.2 README accuracy pass: features list matches the shipped app,
     gallery index matches `assets/art/`, run instructions work from a
     clean clone
   - [ ] 13.3 Confirm GitHub Pages deployment from the repo root serves the
