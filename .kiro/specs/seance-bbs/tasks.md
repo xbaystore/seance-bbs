@@ -58,19 +58,19 @@ checks, and only then continue.
   - [ ] Keyboard-only pass: every control reachable, focus always visible
   - _Requirements: 1, 2, 8 (partial)_
 
-- [ ] 6. Router and menu shell
-  - [ ] 6.1 Implement the hash router (`#/`, `#/boards`, `#/board/:id`,
+- [x] 6. Router and menu shell
+  - [x] 6.1 Implement the hash router (`#/`, `#/boards`, `#/board/:id`,
     `#/thread/:id`, `#/log`, `#/gallery`, `#/art/:id`, `#/settings`) with
     `hashchange` handling and a playful 404 for unknown routes
-  - [ ] 6.2 Implement the main menu screen and shared chrome: status line
+  - [x] 6.2 Implement the main menu screen and shared chrome: status line
     (handle, clock, "CONNECT 14400"), `escapeHtml()` used by every render
   - _Requirements: 3.6, 8.4, 8.5_
 
-- [ ] 7. Message boards
-  - [ ] 7.1 Board list screen with thread counts and last-activity dates
-  - [ ] 7.2 Thread list screen (newest-first) and thread view
+- [x] 7. Message boards
+  - [x] 7.1 Board list screen with thread counts and last-activity dates
+  - [x] 7.2 Thread list screen (newest-first) and thread view
     (chronological, handle + timestamp per post)
-  - [ ] 7.3 New-thread and reply forms with validation (non-empty body,
+  - [x] 7.3 New-thread and reply forms with validation (non-empty body,
     2,000-char cap, subject required for threads) and immediate in-place
     rendering after save
   - _Requirements: 3.1–3.5_

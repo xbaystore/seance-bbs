@@ -1143,62 +1143,665 @@
 
   /* ─────────────────────────────────────────────────────────────────────
      5. ROUTER / SCREENS
-     Hash router and screen renderers — full implementation in task 6+.
-     Placeholder: shows the main menu stub after boot.
+     Hash router (task 6.1) and all screen renderers (tasks 6.2, 7.1-7.3).
+
+     Routes:
+       #/              → main menu
+       #/boards        → board list
+       #/board/:id     → thread list for a board
+       #/thread/:id    → thread view + reply form
+       #/log           → séance log (placeholder, task 8)
+       #/gallery       → art gallery index (placeholder, task 9)
+       #/art/:id       → single art piece (placeholder, task 9)
+       #/settings      → settings (placeholder, task 12)
+       anything else   → 404 — CARRIER LOST
+
+     All user content MUST pass through escapeHtml() before interpolation.
      ───────────────────────────────────────────────────────────────────── */
   var Router = (function () {
     var _activeScreen = document.getElementById("active-screen");
     var _nav          = document.getElementById("bbs-nav");
-    var _cursor       = document.getElementById("cursor");
+
+    /* ── Shared chrome helpers ───────────────────────────────────── */
 
     function showNav() {
       if (_nav) { _nav.hidden = false; }
     }
 
-    function hideNav() {
-      if (_nav) { _nav.hidden = true; }
+    /**
+     * Update the status line handle display.
+     * Called after any handle change.
+     */
+    function _updateStatusLine() {
+      var state = Store.get();
+      var statusHandle = document.getElementById("status-handle");
+      if (statusHandle) {
+        if (state.meta.handle) {
+          statusHandle.textContent = "CALLER: " + state.meta.handle.toUpperCase();
+        } else {
+          statusHandle.textContent = "";
+        }
+      }
     }
 
     /**
-     * Render a placeholder menu stub so the app has a visible landing
-     * state after boot (tasks 6+ replace this with full screens).
+     * Render a system-notice banner at the top of a screen if needed
+     * (storage denied, restored from backup).
+     * @returns {string} HTML string
      */
-    function renderMenuStub() {
+    function _noticeHtml() {
+      var state = Store.get();
+      var out = "";
+      if (state.meta.storageDenied) {
+        out += '<p class="line line--warn" role="alert">'
+          + "⚠ TAPE DRIVE OFFLINE — this session won't be remembered.</p>";
+      }
+      if (state.meta.restoredFromBackup) {
+        out += '<p class="line line--warn" role="alert">'
+          + "⚠ Restored from backup tapes.</p>";
+      }
+      return out;
+    }
+
+    /**
+     * Guard that ensures a caller has a handle before posting.
+     * Returns true if a handle exists; otherwise renders the handle prompt
+     * and returns false. The caller should abort if false is returned.
+     * @param {Function} onReady — called after handle is set
+     * @returns {boolean}
+     */
+    function _requireHandle(onReady) {
+      var state = Store.get();
+      if (state.meta.handle) { return true; }
+      HandlePrompt.present(function () {
+        _updateStatusLine();
+        if (typeof onReady === "function") { onReady(); }
+      });
+      return false;
+    }
+
+    /* ── Board helper utilities ──────────────────────────────────── */
+
+    /**
+     * Return the last-activity date for a board (most recent post createdAt).
+     * @param {string} boardId
+     * @param {Array}  posts
+     * @returns {string} ISO date or empty string
+     */
+    function _boardLastActivity(boardId, posts) {
+      var last = "";
+      posts.forEach(function (p) {
+        if (p.boardId === boardId && (!last || p.createdAt > last)) {
+          last = p.createdAt;
+        }
+      });
+      return last;
+    }
+
+    /**
+     * Return thread count for a board (count of root posts).
+     * @param {string} boardId
+     * @param {Array}  posts
+     * @returns {number}
+     */
+    function _boardThreadCount(boardId, posts) {
+      var count = 0;
+      posts.forEach(function (p) {
+        if (p.boardId === boardId && p.parentId === null) { count++; }
+      });
+      return count;
+    }
+
+    /**
+     * Return reply count for a thread (not counting the root post itself).
+     * @param {string} threadId
+     * @param {Array}  posts
+     * @returns {number}
+     */
+    function _replyCount(threadId, posts) {
+      var count = 0;
+      posts.forEach(function (p) {
+        if (p.threadId === threadId && p.parentId !== null) { count++; }
+      });
+      return count;
+    }
+
+    /**
+     * Return the last-activity date for a thread.
+     * @param {string} threadId
+     * @param {Array}  posts
+     * @returns {string}
+     */
+    function _threadLastActivity(threadId, posts) {
+      var last = "";
+      posts.forEach(function (p) {
+        if (p.threadId === threadId && (!last || p.createdAt > last)) {
+          last = p.createdAt;
+        }
+      });
+      return last;
+    }
+
+    /* ── Post / reply form validation ───────────────────────────── */
+
+    var MAX_BODY = 2000;
+
+    /**
+     * Validate a new-thread or reply submission.
+     * @param {object} opts
+     * @param {string} opts.body
+     * @param {string} [opts.subject]  — required for threads
+     * @param {boolean} opts.isThread  — true if this is a new thread
+     * @returns {{ ok: boolean, error: string }}
+     */
+    function _validatePost(opts) {
+      var body    = (opts.body    || "").trim();
+      var subject = (opts.subject || "").trim();
+      var isThread = !!opts.isThread;
+
+      if (isThread && subject.length === 0) {
+        return { ok: false, error: "SUBJECT REQUIRED — give your thread a subject." };
+      }
+      if (body.length === 0) {
+        return { ok: false, error: "BODY REQUIRED — write something before you post." };
+      }
+      if (body.length > MAX_BODY) {
+        return { ok: false, error: "TOO LONG — body must be " + MAX_BODY
+          + " characters or fewer. Yours is " + body.length + "." };
+      }
+      return { ok: true, error: "" };
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       SCREEN RENDERERS
+       Each renderer writes HTML into _activeScreen.innerHTML, then
+       binds event handlers.  All user content is escaped.
+       ═══════════════════════════════════════════════════════════════ */
+
+    /* ── 6.2  Main Menu ──────────────────────────────────────────── */
+
+    function renderMenu() {
       var state = Store.get();
       var handle = state.meta.handle
         ? escapeHtml(state.meta.handle)
-        : "(no handle set)";
-
-      var warnings = "";
-      if (state.meta.storageDenied) {
-        warnings += '<p class="transcript line--warn">'
-          + "⚠ TAPE DRIVE OFFLINE — this session won\'t be remembered.</p>";
-      }
-      if (state.meta.restoredFromBackup) {
-        warnings += '<p class="transcript line--warn">'
-          + "⚠ State restored from backup tapes.</p>";
-      }
+        : "<em>no handle set</em>";
 
       _activeScreen.innerHTML =
-        warnings +
-        '<p class="screen-title">MAIN MENU</p>' +
-        '<p class="screen-subtitle">Caller: ' + handle + '</p>' +
-        '<p class="screen-subtitle">Full menu navigation arrives in task 6.</p>' +
-        '<p class="screen-subtitle">' +
-        '<button type="button" id="change-handle-btn" class="menu-btn">' +
-        '[ CHANGE HANDLE ]</button></p>';
+        _noticeHtml() +
+        '<section class="screen-section" aria-label="Main menu">' +
+        '<h1 class="screen-title">MAIN MENU</h1>' +
+        '<p class="line line--dim">CONNECT 14400 · NODE 1 · ' + escapeHtml(new Date().toLocaleDateString()) + '</p>' +
+        '<p class="line">Caller: <strong>' + handle + '</strong></p>' +
+        '<nav class="menu-nav" aria-label="Main menu options">' +
+        '<ul class="menu-list" role="list">' +
+        '<li><a class="menu-link" href="#/boards">[B] MESSAGE BOARDS</a></li>' +
+        '<li><a class="menu-link" href="#/log">[L] SÉANCE LOG (guestbook)</a></li>' +
+        '<li><a class="menu-link" href="#/gallery">[G] ART GALLERY</a></li>' +
+        '<li><a class="menu-link" href="#/settings">[S] SETTINGS</a></li>' +
+        '</ul>' +
+        '</nav>' +
+        '<p class="line line--dim" style="margin-top:1em">Use the NAV bar above or type a letter above to jump.</p>' +
+        '</section>';
+
+      showNav();
+    }
+
+    /* ── 7.1  Board list ─────────────────────────────────────────── */
+
+    function renderBoardList() {
+      var state = Store.get();
+      var boards = state.boards.slice().sort(function (a, b) {
+        return (a.order || 0) - (b.order || 0);
+      });
+
+      var rows = boards.map(function (board) {
+        var threadCount  = _boardThreadCount(board.id, state.posts);
+        var lastActivity = _boardLastActivity(board.id, state.posts);
+        var lastStr      = lastActivity ? fmtDate(lastActivity) : "no posts yet";
+
+        return '<li class="board-row">'
+          + '<a class="board-link" href="#/board/' + escapeHtml(board.slug || board.id) + '">'
+          + '<span class="board-name">' + escapeHtml(board.name) + '</span>'
+          + '</a>'
+          + '<span class="board-desc">' + escapeHtml(board.description) + '</span>'
+          + '<span class="board-meta">'
+          + escapeHtml(String(threadCount)) + ' thread' + (threadCount === 1 ? "" : "s")
+          + ' · last post: ' + escapeHtml(lastStr)
+          + '</span>'
+          + '</li>';
+      }).join("");
+
+      _activeScreen.innerHTML =
+        _noticeHtml() +
+        '<section class="screen-section" aria-label="Message boards">' +
+        '<h1 class="screen-title">MESSAGE BOARDS</h1>' +
+        '<p class="line line--dim">' + escapeHtml(String(boards.length)) + ' board' + (boards.length === 1 ? "" : "s") + ' available — select one to browse threads.</p>' +
+        '<ul class="board-list" role="list">' + rows + '</ul>' +
+        '<p class="line line--dim back-link"><a class="menu-link" href="#/">&larr; BACK TO MENU</a></p>' +
+        '</section>';
+
+      showNav();
+    }
+
+    /* ── 7.2a  Thread list (board view) ──────────────────────────── */
+
+    function renderBoard(boardId) {
+      var state  = Store.get();
+      var board  = null;
+      state.boards.forEach(function (b) {
+        if (b.id === boardId || b.slug === boardId) { board = b; }
+      });
+
+      if (!board) {
+        renderNotFound("Board &ldquo;" + escapeHtml(boardId) + "&rdquo; not found.");
+        return;
+      }
+
+      /* Collect root posts (threads) for this board, newest-first */
+      var threads = state.posts.filter(function (p) {
+        return p.boardId === board.id && p.parentId === null;
+      }).sort(function (a, b) {
+        /* Sort by last-activity (most recent first) */
+        var la = _threadLastActivity(a.threadId, state.posts);
+        var lb = _threadLastActivity(b.threadId, state.posts);
+        if (lb < la) { return -1; }
+        if (lb > la) { return 1; }
+        return 0;
+      });
+
+      var rows = threads.length === 0
+        ? '<li class="thread-row thread-row--empty"><span class="line line--dim">No threads yet. Be the first to post.</span></li>'
+        : threads.map(function (t) {
+          var replies  = _replyCount(t.threadId, state.posts);
+          var lastAct  = _threadLastActivity(t.threadId, state.posts);
+          var lastStr  = lastAct ? fmtDate(lastAct) : fmtDate(t.createdAt);
+          return '<li class="thread-row">'
+            + '<a class="thread-link" href="#/thread/' + escapeHtml(t.id) + '">'
+            + escapeHtml(t.subject || "(no subject)")
+            + '</a>'
+            + '<span class="thread-meta">'
+            + 'by <span class="handle' + (t.ghost ? " handle--ghost" : "") + '">'
+            + escapeHtml(t.author)
+            + (t.ghost ? ' <span class="sysop-tag" aria-label="SysOp">[SYSOP]</span>' : "")
+            + '</span>'
+            + ' · ' + escapeHtml(String(replies)) + ' repl' + (replies === 1 ? "y" : "ies")
+            + ' · ' + escapeHtml(lastStr)
+            + '</span>'
+            + '</li>';
+        }).join("");
+
+      _activeScreen.innerHTML =
+        _noticeHtml() +
+        '<section class="screen-section" aria-label="' + escapeHtml(board.name) + '">' +
+        '<h1 class="screen-title">' + escapeHtml(board.name) + '</h1>' +
+        '<p class="line line--dim">' + escapeHtml(board.description) + '</p>' +
+        '<ul class="thread-list" role="list">' + rows + '</ul>' +
+        '<div class="screen-actions">' +
+        '<button type="button" class="menu-btn" id="new-thread-btn">[N] NEW THREAD</button>' +
+        '</div>' +
+        '<p class="line line--dim back-link"><a class="menu-link" href="#/boards">&larr; BACK TO BOARDS</a></p>' +
+        '</section>';
+
       showNav();
 
-      var chBtn = document.getElementById("change-handle-btn");
-      if (chBtn) {
-        chBtn.addEventListener("click", function () {
-          HandlePrompt.change(function () { renderMenuStub(); });
+      var newThreadBtn = document.getElementById("new-thread-btn");
+      if (newThreadBtn) {
+        newThreadBtn.addEventListener("click", function () {
+          /* Require handle before posting (Req 2.1 / task 4) */
+          if (!_requireHandle(function () { renderNewThread(board.id); })) { return; }
+          renderNewThread(board.id);
         });
       }
     }
 
+    /* ── 7.3a  New-thread form ───────────────────────────────────── */
+
+    function renderNewThread(boardId) {
+      var state = Store.get();
+      var board = null;
+      state.boards.forEach(function (b) {
+        if (b.id === boardId || b.slug === boardId) { board = b; }
+      });
+      if (!board) { renderNotFound("Board not found."); return; }
+
+      _activeScreen.innerHTML =
+        '<section class="screen-section" aria-label="New thread">' +
+        '<h1 class="screen-title">NEW THREAD — ' + escapeHtml(board.name) + '</h1>' +
+        '<form id="new-thread-form" class="post-form" autocomplete="off" novalidate>' +
+        '<div class="form-row">' +
+        '<label class="form-label" for="thread-subject">SUBJECT&gt;</label>' +
+        '<input id="thread-subject" class="form-input" type="text" maxlength="120"' +
+        ' aria-label="Thread subject" required />' +
+        '</div>' +
+        '<div class="form-row">' +
+        '<label class="form-label" for="thread-body">MESSAGE&gt;</label>' +
+        '<textarea id="thread-body" class="form-textarea" rows="8"' +
+        ' maxlength="' + MAX_BODY + '"' +
+        ' aria-label="Post body" required></textarea>' +
+        '</div>' +
+        '<p id="thread-char-count" class="line line--dim char-count">0 / ' + MAX_BODY + ' chars</p>' +
+        '<p id="post-error" class="line line--warn" aria-live="polite" hidden></p>' +
+        '<div class="form-actions">' +
+        '<button type="submit" class="menu-btn">[P] POST THREAD</button>' +
+        '<button type="button" class="menu-btn menu-btn--cancel" id="cancel-thread-btn">[X] CANCEL</button>' +
+        '</div>' +
+        '</form>' +
+        '</section>';
+
+      showNav();
+
+      var form       = document.getElementById("new-thread-form");
+      var subjectEl  = document.getElementById("thread-subject");
+      var bodyEl     = document.getElementById("thread-body");
+      var charCount  = document.getElementById("thread-char-count");
+      var errorEl    = document.getElementById("post-error");
+      var cancelBtn  = document.getElementById("cancel-thread-btn");
+
+      /* Live character counter */
+      bodyEl.addEventListener("input", function () {
+        var len = bodyEl.value.length;
+        charCount.textContent = len + " / " + MAX_BODY + " chars";
+        charCount.classList.toggle("line--warn", len > MAX_BODY);
+      });
+
+      cancelBtn.addEventListener("click", function () {
+        window.location.hash = "#/board/" + encodeURIComponent(board.slug || board.id);
+      });
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var result = _validatePost({
+          isThread: true,
+          subject:  subjectEl.value,
+          body:     bodyEl.value
+        });
+        if (!result.ok) {
+          errorEl.textContent = result.error;
+          errorEl.hidden = false;
+          return;
+        }
+        errorEl.hidden = true;
+
+        var currentState = Store.get();
+        var newPost = {
+          id:        genId(),
+          boardId:   board.id,
+          threadId:  null,  // set after id is known
+          parentId:  null,
+          subject:   subjectEl.value.trim(),
+          author:    currentState.meta.handle,
+          body:      bodyEl.value.trim(),
+          createdAt: new Date().toISOString(),
+          ghost:     false
+        };
+        newPost.threadId = newPost.id;
+
+        Store.update(function (s) {
+          s.posts.push(newPost);
+        });
+
+        /* Navigate to the new thread immediately (Req 3.4) */
+        window.location.hash = "#/thread/" + encodeURIComponent(newPost.id);
+      });
+
+      if (subjectEl) { subjectEl.focus(); }
+    }
+
+    /* ── 7.2b  Thread view ───────────────────────────────────────── */
+
+    function renderThread(threadId) {
+      var state  = Store.get();
+      var thread = null;
+
+      /* Find the root post of the thread */
+      state.posts.forEach(function (p) {
+        if (p.id === threadId && p.parentId === null) { thread = p; }
+      });
+
+      if (!thread) {
+        renderNotFound("Thread &ldquo;" + escapeHtml(threadId) + "&rdquo; not found.");
+        return;
+      }
+
+      /* Find the board */
+      var board = null;
+      state.boards.forEach(function (b) {
+        if (b.id === thread.boardId) { board = b; }
+      });
+
+      /* Collect all posts in this thread, chronological */
+      var allPosts = state.posts.filter(function (p) {
+        return p.threadId === threadId;
+      }).sort(function (a, b) {
+        if (a.createdAt < b.createdAt) { return -1; }
+        if (a.createdAt > b.createdAt) { return 1; }
+        return 0;
+      });
+
+      var postHtml = allPosts.map(function (p, idx) {
+        var ghostClass = p.ghost ? " post--ghost" : "";
+        var handleHtml = '<span class="handle' + (p.ghost ? " handle--ghost" : "") + '">'
+          + escapeHtml(p.author)
+          + (p.ghost ? ' <span class="sysop-tag" aria-label="SysOp">[SYSOP]</span>' : "")
+          + '</span>';
+        var isRoot = (p.parentId === null);
+
+        return '<article class="post' + ghostClass + '" id="post-' + escapeHtml(p.id) + '"'
+          + ' aria-label="Post by ' + escapeHtml(p.author) + '">'
+          + '<header class="post-header">'
+          + (idx === 0
+            ? '<h2 class="post-subject">' + escapeHtml(p.subject || "(no subject)") + '</h2>'
+            : "")
+          + '<div class="post-meta">'
+          + handleHtml
+          + ' &middot; <time datetime="' + escapeHtml(p.createdAt) + '">' + escapeHtml(fmtDate(p.createdAt)) + '</time>'
+          + (isRoot ? '' : ' &middot; <a class="post-ref" href="#post-' + escapeHtml(p.parentId || "") + '">#' + escapeHtml(p.parentId || "") + '</a>')
+          + '</div>'
+          + '</header>'
+          + '<div class="post-body"><pre class="post-pre">' + escapeHtml(p.body) + '</pre></div>'
+          + '</article>';
+      }).join('<hr class="post-divider" aria-hidden="true" />');
+
+      var boardLink = board
+        ? '<a class="menu-link" href="#/board/' + escapeHtml(board.slug || board.id) + '">'
+          + escapeHtml(board.name) + '</a>'
+        : '<a class="menu-link" href="#/boards">Boards</a>';
+
+      _activeScreen.innerHTML =
+        _noticeHtml() +
+        '<section class="screen-section" aria-label="Thread: ' + escapeHtml(thread.subject || "Thread") + '">' +
+        '<p class="line line--dim back-link"><a class="menu-link" href="#/boards">&larr; BOARDS</a> / ' + boardLink + '</p>' +
+        '<div class="thread-posts">' + (postHtml || '<p class="line line--dim">No posts in this thread.</p>') + '</div>' +
+        '<div id="reply-section" class="reply-section"></div>' +
+        '<p class="line line--dim back-link"><a class="menu-link" href="#/board/' + escapeHtml(board ? (board.slug || board.id) : "") + '">&larr; BACK TO BOARD</a></p>' +
+        '</section>';
+
+      showNav();
+
+      /* Render the reply form inline */
+      _renderReplyForm(thread, board);
+    }
+
+    /* ── 7.3b  Reply form ────────────────────────────────────────── */
+
+    function _renderReplyForm(thread, board) {
+      var replySection = document.getElementById("reply-section");
+      if (!replySection) { return; }
+
+      replySection.innerHTML =
+        '<h2 class="screen-subtitle reply-heading">POST A REPLY</h2>' +
+        '<form id="reply-form" class="post-form" autocomplete="off" novalidate>' +
+        '<div class="form-row">' +
+        '<label class="form-label" for="reply-body">MESSAGE&gt;</label>' +
+        '<textarea id="reply-body" class="form-textarea" rows="6"' +
+        ' maxlength="' + MAX_BODY + '"' +
+        ' aria-label="Reply body" required></textarea>' +
+        '</div>' +
+        '<p id="reply-char-count" class="line line--dim char-count">0 / ' + MAX_BODY + ' chars</p>' +
+        '<p id="reply-error" class="line line--warn" aria-live="polite" hidden></p>' +
+        '<div class="form-actions">' +
+        '<button type="submit" class="menu-btn">[R] POST REPLY</button>' +
+        '</div>' +
+        '</form>';
+
+      var form      = document.getElementById("reply-form");
+      var bodyEl    = document.getElementById("reply-body");
+      var charCount = document.getElementById("reply-char-count");
+      var errorEl   = document.getElementById("reply-error");
+
+      bodyEl.addEventListener("input", function () {
+        var len = bodyEl.value.length;
+        charCount.textContent = len + " / " + MAX_BODY + " chars";
+        charCount.classList.toggle("line--warn", len > MAX_BODY);
+      });
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        /* Require handle before posting */
+        if (!_requireHandle(function () {
+          renderThread(thread.id);
+        })) { return; }
+
+        var result = _validatePost({ isThread: false, body: bodyEl.value });
+        if (!result.ok) {
+          errorEl.textContent = result.error;
+          errorEl.hidden = false;
+          return;
+        }
+        errorEl.hidden = true;
+
+        var currentState = Store.get();
+
+        /* Find the last post in this thread to reply to */
+        var threadPosts = currentState.posts.filter(function (p) {
+          return p.threadId === thread.id;
+        });
+        var lastPost = threadPosts.reduce(function (latest, p) {
+          return (!latest || p.createdAt > latest.createdAt) ? p : latest;
+        }, null);
+
+        var newReply = {
+          id:        genId(),
+          boardId:   thread.boardId,
+          threadId:  thread.id,
+          parentId:  lastPost ? lastPost.id : thread.id,
+          subject:   null,
+          author:    currentState.meta.handle,
+          body:      bodyEl.value.trim(),
+          createdAt: new Date().toISOString(),
+          ghost:     false
+        };
+
+        Store.update(function (s) {
+          s.posts.push(newReply);
+        });
+
+        /* Re-render thread in place (Req 3.4 — immediate, no reload) */
+        renderThread(thread.id);
+
+        /* Scroll to new post */
+        var newPostEl = document.getElementById("post-" + newReply.id);
+        if (newPostEl) {
+          newPostEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
+    }
+
+    /* ── Placeholder screens for tasks 8, 9, 12 ─────────────────── */
+
+    function _renderPlaceholder(title, routeHint) {
+      _activeScreen.innerHTML =
+        _noticeHtml() +
+        '<section class="screen-section" aria-label="' + escapeHtml(title) + '">' +
+        '<h1 class="screen-title">' + escapeHtml(title) + '</h1>' +
+        '<p class="line line--dim">[ ' + escapeHtml(routeHint) + ' — coming soon ]</p>' +
+        '<p class="line line--dim back-link"><a class="menu-link" href="#/">&larr; BACK TO MENU</a></p>' +
+        '</section>';
+      showNav();
+    }
+
+    function renderLog() {
+      _renderPlaceholder("SÉANCE LOG", "Task 8 — guestbook implementation");
+    }
+
+    function renderGallery() {
+      _renderPlaceholder("ART GALLERY", "Task 9 — gallery implementation");
+    }
+
+    function renderArt(artId) {
+      _renderPlaceholder("ART PIECE — " + artId, "Task 9 — art view implementation");
+    }
+
+    function renderSettings() {
+      _renderPlaceholder("SETTINGS", "Task 12 — settings implementation");
+    }
+
+    /* ── 404 ─────────────────────────────────────────────────────── */
+
+    function renderNotFound(detail) {
+      _activeScreen.innerHTML =
+        '<section class="screen-section" aria-label="404 Not Found">' +
+        '<h1 class="screen-title">404 — CARRIER LOST</h1>' +
+        '<p class="line line--warn">The route you dialed doesn\'t connect to anything.</p>' +
+        (detail ? '<p class="line line--dim">' + detail + '</p>' : '') +
+        '<p class="line line--dim back-link"><a class="menu-link" href="#/">&larr; BACK TO MENU</a></p>' +
+        '</section>';
+      showNav();
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       ROUTER — parse hash and dispatch to screen renderer
+       ═══════════════════════════════════════════════════════════════ */
+
+    /**
+     * Parse window.location.hash into a route object.
+     * @returns {{ path: string, params: string[] }}
+     */
+    function _parseHash() {
+      var hash = window.location.hash || "#/";
+      /* Strip leading # */
+      var path = hash.slice(1) || "/";
+      /* Strip trailing slash (except root) */
+      if (path.length > 1 && path.slice(-1) === "/") {
+        path = path.slice(0, -1);
+      }
+      var parts = path.split("/");
+      /* parts[0] is always "" (before first slash) */
+      return { path: path, parts: parts };
+    }
+
+    /**
+     * Dispatch the current hash to the appropriate screen renderer.
+     * Called on hashchange and on initial load.
+     */
     function route() {
-      renderMenuStub();
+      var parsed = _parseHash();
+      var parts  = parsed.parts;
+      /* parts: ["", "boards"], ["", "board", "general"], ["", "thread", "id"], … */
+
+      var seg1 = parts[1] || "";   /* e.g. "boards", "board", "thread", … */
+      var seg2 = parts[2] || "";   /* e.g. board slug, thread id */
+
+      if (seg1 === "" || seg1 === "/") {
+        renderMenu();
+      } else if (seg1 === "boards") {
+        renderBoardList();
+      } else if (seg1 === "board" && seg2) {
+        renderBoard(decodeURIComponent(seg2));
+      } else if (seg1 === "thread" && seg2) {
+        renderThread(decodeURIComponent(seg2));
+      } else if (seg1 === "log") {
+        renderLog();
+      } else if (seg1 === "gallery") {
+        renderGallery();
+      } else if (seg1 === "art" && seg2) {
+        renderArt(decodeURIComponent(seg2));
+      } else if (seg1 === "settings") {
+        renderSettings();
+      } else {
+        renderNotFound(null);
+      }
     }
 
     function init() {
@@ -1206,7 +1809,11 @@
       route();
     }
 
-    return { init: init, renderMenuStub: renderMenuStub };
+    return {
+      init:        init,
+      route:       route,
+      renderMenu:  renderMenu
+    };
   })();
 
   /* ─────────────────────────────────────────────────────────────────────
