@@ -40,13 +40,13 @@ checks, and only then continue.
     alive, with no futuristic timestamps
   - _Requirements: 7.1, 3.1, 4.1, 5.1_
 
-- [ ] 4. Boot sequence and handle prompt
-  - [ ] 4.1 Implement the data-driven boot script (ATDT → DIALING →
+- [x] 4. Boot sequence and handle prompt
+  - [x] 4.1 Implement the data-driven boot script (ATDT → DIALING →
     negotiation → CONNECT 14400 → ASCII banner) with typewriter rendering
     and skip-on-keypress/click
-  - [ ] 4.2 Implement the short "redial" script for returning callers and
+  - [x] 4.2 Implement the short "redial" script for returning callers and
     the static-transcript variant for reduced-motion / contrast mode
-  - [ ] 4.3 Implement handle capture with validation (2–20 chars, allowed
+  - [x] 4.3 Implement handle capture with validation (2–20 chars, allowed
     character set), persistence, status-line display, and the
     change-handle menu option
   - _Requirements: 1.1–1.6, 2.1–2.6_

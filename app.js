@@ -457,12 +457,51 @@
       ghost:     false
     };
 
+    // --- Board: hardware (6th thread — added for task 3.2 / req 7.1) ---
+
+    var t6 = {
+      id:        "seedt6",
+      boardId:   "hardware",
+      threadId:  "seedt6",
+      parentId:  null,
+      subject:   "What's the oldest piece of hardware you still power on?",
+      author:    "modem_moth",
+      body:      "I've got a Tandy 1000 that boots every October like clockwork. Something about the season. The disk drive sounds like a cricket. I think the BIOS has opinions.",
+      createdAt: daysBack(16, 9),
+      ghost:     false
+    };
+
+    var t6r1 = {
+      id:        "seedt6r1",
+      boardId:   "hardware",
+      threadId:  "seedt6",
+      parentId:  "seedt6",
+      subject:   null,
+      author:    "null_sector",
+      body:      "Apple IIe. 1983. Still runs Oregon Trail. I've died of dysentery on that machine more times than I can count. Comforting in a way.",
+      createdAt: daysBack(15, 22),
+      ghost:     false
+    };
+
+    var t6r2 = {
+      id:        "seedt6r2",
+      boardId:   "hardware",
+      threadId:  "seedt6",
+      parentId:  "seedt6r1",
+      subject:   null,
+      author:    "baud_rate_barbie",
+      body:      "Commodore 64 with a 1541 disk drive. The loading screen noise is part of my soul at this point. It takes 4 minutes to load a game and those 4 minutes are sacred.",
+      createdAt: daysBack(15, 14),
+      ghost:     false
+    };
+
     var SEED_POSTS = [
       t1, t1r1, t1r2, t1ghost,
       t2, t2r1, t2r2,
       t3, t3r1,
       t4, t4r1, t4ghost,
-      t5, t5r1
+      t5, t5r1,
+      t6, t6r1, t6r2
     ];
 
     /* Track which items the ghost has already replied to (seed replies) */
@@ -693,104 +732,413 @@
 
   /* ─────────────────────────────────────────────────────────────────────
      4. BOOT SEQUENCE
-     Minimal placeholder boot — full typewriter implementation in task 4.
-     Respects prefers-reduced-motion.
+     Data-driven dial-up ritual with:
+       • Character-by-character typewriter rendering per line
+       • Skip on any keypress or click → fast-forward remaining lines
+       • BOOT_SCRIPT_SHORT for returning callers (≤ half the steps)
+       • Static-transcript mode for prefers-reduced-motion / contrast
      ───────────────────────────────────────────────────────────────────── */
   var BootSequence = (function () {
 
+    /*
+     * Each step: { text, cls, delay, charDelay? }
+     *   text      — line text (empty string = blank spacer line)
+     *   cls       — extra CSS class(es) on the <span>
+     *   delay     — ms to wait AFTER the line is fully typed before next line
+     *   charDelay — ms per character (default: CHAR_DELAY_MS)
+     */
+    var CHAR_DELAY_MS = 28;   // ~35 chars/second — readable but snappy
+
     var BOOT_SCRIPT = [
-      { text: "ATDT 555-0199",                       cls: "line--dim",    delay: 400  },
-      { text: "DIALING SÉANCE BBS...",               cls: "",             delay: 900  },
-      { text: "~ screech ~ hiss ~ carrier ~",        cls: "line--noise",  delay: 1200 },
-      { text: "CARRIER 14400",                       cls: "line--dim",    delay: 600  },
-      { text: "PROTOCOL: LAP-M ERROR CORRECT",       cls: "line--dim",    delay: 500  },
-      { text: "CONNECT 14400",                       cls: "line--bright", delay: 800  },
-      { text: "",                                    cls: "line--gap",    delay: 400  },
-      { text: "████████████████████████████████████",cls: "line--banner", delay: 300  },
-      { text: "   S É A N C E   B B S   v 1 . 0   ", cls: "line--banner", delay: 300  },
-      { text: "████████████████████████████████████",cls: "line--banner", delay: 300  },
-      { text: "",                                    cls: "line--gap",    delay: 300  },
-      { text: "NODE 1 OPEN — WELCOME, CALLER.",      cls: "",             delay: 600  }
+      { text: "ATDT 555-0199",                        cls: "line--dim",    delay: 500,  charDelay: 40  },
+      { text: "DIALING SÉANCE BBS...",                cls: "",             delay: 700,  charDelay: 55  },
+      { text: "~ screech ~ hiss ~ bong ~",            cls: "line--noise",  delay: 1100, charDelay: 20  },
+      { text: "CARRIER 14400",                        cls: "line--dim",    delay: 500,  charDelay: 30  },
+      { text: "PROTOCOL: LAP-M ERROR CORRECT",        cls: "line--dim",    delay: 450,  charDelay: 25  },
+      { text: "COMPRESSION: V.42bis",                 cls: "line--dim",    delay: 350,  charDelay: 25  },
+      { text: "CONNECT 14400",                        cls: "line--bright", delay: 700,  charDelay: 50  },
+      { text: "",                                     cls: "line--gap",    delay: 300,  charDelay: 0   },
+      { text: "████████████████████████████████████", cls: "line--banner", delay: 150,  charDelay: 8   },
+      { text: "   S É A N C E   B B S   v 1 . 0   ", cls: "line--banner", delay: 150,  charDelay: 30  },
+      { text: "████████████████████████████████████", cls: "line--banner", delay: 300,  charDelay: 8   },
+      { text: "",                                     cls: "line--gap",    delay: 250,  charDelay: 0   },
+      { text: "NODE 1 OPEN — WELCOME, CALLER.",       cls: "",             delay: 600,  charDelay: 30  }
     ];
 
+    /* Redial variant — ≤ half the steps of BOOT_SCRIPT (6 steps vs 13) */
     var BOOT_SCRIPT_SHORT = [
-      { text: "ATDT 555-0199",         cls: "line--dim",    delay: 200  },
-      { text: "REDIALING SÉANCE BBS...",cls: "",            delay: 400  },
-      { text: "CONNECT 14400",         cls: "line--bright", delay: 500  },
-      { text: "WELCOME BACK.",         cls: "",             delay: 300  }
+      { text: "ATDT 555-0199",           cls: "line--dim",    delay: 200, charDelay: 35 },
+      { text: "REDIALING SÉANCE BBS...", cls: "",             delay: 350, charDelay: 40 },
+      { text: "~ bong ~",               cls: "line--noise",  delay: 300, charDelay: 25 },
+      { text: "CONNECT 14400",          cls: "line--bright", delay: 400, charDelay: 45 },
+      { text: "",                       cls: "line--gap",    delay: 150, charDelay: 0  },
+      { text: "WELCOME BACK, CALLER.",  cls: "",             delay: 400, charDelay: 30 }
     ];
 
+    /* ── DOM refs ─────────────────────────────────────────────────── */
     var transcript = document.getElementById("transcript");
     var skipBtn    = document.getElementById("skip-btn");
-    var _timers    = [];
-    var _done      = false;
 
-    var reduceMotion =
+    /* ── State ────────────────────────────────────────────────────── */
+    var _timers       = [];
+    var _done         = false;
+    var _skipCallback = null;   // set during play(); called on skip
+
+    var _reduceMotion =
       window.matchMedia &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    function appendLine(step) {
+    /* ── Helpers ──────────────────────────────────────────────────── */
+
+    /** Cancel all pending timers. */
+    function _clearTimers() {
+      _timers.forEach(function (t) { clearTimeout(t); });
+      _timers = [];
+    }
+
+    /**
+     * Append a fully-formed line span to the transcript immediately.
+     * Used by skip and by the static (reduced-motion) path.
+     * @param {Object} step
+     */
+    function _appendLineFull(step) {
       var span = document.createElement("span");
       span.className = "line" + (step.cls ? " " + step.cls : "");
       span.textContent = step.text;
       transcript.appendChild(span);
     }
 
-    function clearTimers() {
-      _timers.forEach(function (t) { clearTimeout(t); });
-      _timers = [];
-    }
+    /**
+     * Create a span for a line and type its characters one-by-one.
+     * Returns the total ms consumed so the caller can offset the next step.
+     *
+     * @param {Object}   step
+     * @param {number}   startAt   — absolute ms offset from call time (0 = now)
+     * @param {Function} onFinish  — called when last character is printed
+     * @returns {number}           — ms offset at which the line is complete
+     */
+    function _typewriteLine(step, startAt, onFinish) {
+      var span = document.createElement("span");
+      span.className = "line" + (step.cls ? " " + step.cls : "");
+      transcript.appendChild(span);
 
-    function finish(onDone) {
-      if (_done) { return; }
-      _done = true;
-      clearTimers();
-      if (skipBtn) { skipBtn.hidden = true; }
-      if (typeof onDone === "function") { onDone(); }
+      var text     = step.text;
+      var cDelay   = (step.charDelay !== undefined) ? step.charDelay : CHAR_DELAY_MS;
+      var len      = text.length;
+
+      if (len === 0) {
+        // Blank / gap lines finish immediately
+        var t = window.setTimeout(function () {
+          if (typeof onFinish === "function") { onFinish(); }
+        }, startAt);
+        _timers.push(t);
+        return startAt;
+      }
+
+      var lastCharAt = startAt + cDelay * (len - 1);
+
+      for (var i = 0; i < len; i++) {
+        (function (charIndex) {
+          var t = window.setTimeout(function () {
+            span.textContent = text.slice(0, charIndex + 1);
+            if (charIndex === len - 1 && typeof onFinish === "function") {
+              onFinish();
+            }
+          }, startAt + cDelay * charIndex);
+          _timers.push(t);
+        })(i);
+      }
+
+      return lastCharAt;
     }
 
     /**
+     * Fast-forward: dump all remaining lines from `fromIndex` onwards
+     * as fully-formed spans (no typing animation).
+     * The span for the currently-typing line is already in the DOM;
+     * we only need to fill in its final text, then append the rest.
+     *
+     * We track the live span separately via `_liveSpan`.
+     */
+    var _liveSpan   = null;   // the span currently being typed
+    var _liveStep   = null;   // its corresponding step
+    var _remaining  = [];     // steps not yet started
+
+    function _fastForward() {
+      _clearTimers();
+      // Complete the in-progress line if one exists
+      if (_liveSpan && _liveStep) {
+        _liveSpan.textContent = _liveStep.text;
+        _liveSpan  = null;
+        _liveStep  = null;
+      }
+      // Dump the rest
+      _remaining.forEach(_appendLineFull);
+      _remaining = [];
+    }
+
+    /* ── Skip handler ─────────────────────────────────────────────── */
+
+    function _skip() {
+      if (_done) { return; }
+      _done = true;
+      _fastForward();
+      if (skipBtn) { skipBtn.hidden = true; }
+      // Remove keyboard listener
+      document.removeEventListener("keydown", _onKey);
+      if (typeof _skipCallback === "function") { _skipCallback(); }
+    }
+
+    function _onKey() {
+      _skip();
+    }
+
+    /* ── Public: play ─────────────────────────────────────────────── */
+
+    /**
      * Play the boot sequence.
-     * @param {boolean} returning   — true if the caller has a stored handle
-     * @param {Function} onDone     — called when sequence completes or is skipped
+     * @param {boolean}  returning  — true when a stored handle exists
+     * @param {Function} onDone     — called when sequence finishes or is skipped
      */
     function play(returning, onDone) {
+      _done         = false;
+      _liveSpan     = null;
+      _liveStep     = null;
+      _remaining    = [];
+      _skipCallback = onDone;
+
       var script = returning ? BOOT_SCRIPT_SHORT : BOOT_SCRIPT;
 
-      // Show skip button
+      /* Show skip affordance */
       if (skipBtn) {
         skipBtn.hidden = false;
-        skipBtn.addEventListener("click", function () { finish(onDone); }, { once: true });
+        skipBtn.addEventListener("click", _skip, { once: true });
       }
+      document.addEventListener("keydown", _onKey);
 
-      // Keyboard skip
-      function onKey() {
-        document.removeEventListener("keydown", onKey);
-        finish(onDone);
-      }
-      document.addEventListener("keydown", onKey);
-
-      if (reduceMotion) {
-        // Static transcript — print everything instantly
-        script.forEach(appendLine);
-        finish(onDone);
+      /* Reduced-motion / contrast mode → static transcript, no timers */
+      if (_reduceMotion) {
+        script.forEach(_appendLineFull);
+        _done = true;
+        if (skipBtn) { skipBtn.hidden = true; }
+        document.removeEventListener("keydown", _onKey);
+        if (typeof onDone === "function") { onDone(); }
         return;
       }
 
-      var elapsed = 0;
+      /* Typewriter path — build a sequential timeline */
+      var cursor = 0;    // running ms offset
+
       script.forEach(function (step, idx) {
-        elapsed += step.delay;
-        var t = window.setTimeout(function () {
-          appendLine(step);
-          if (idx === script.length - 1) {
-            finish(onDone);
-          }
-        }, elapsed);
-        _timers.push(t);
+        var isLast  = (idx === script.length - 1);
+        var stepIdx = idx;
+
+        // Capture the offset at which this step starts
+        var stepStart = cursor;
+
+        // Schedule the creation of this line's span and typing
+        (function (startMs, s, last) {
+          // We schedule the span creation at startMs so the span appears
+          // at the right moment before characters start flowing.
+          var spanTimer = window.setTimeout(function () {
+            // Mark this as the live (currently-typing) line
+            var newSpan = document.createElement("span");
+            newSpan.className = "line" + (s.cls ? " " + s.cls : "");
+            transcript.appendChild(newSpan);
+            _liveSpan = newSpan;
+            _liveStep = s;
+
+            // Remove this step from _remaining (it's now live)
+            _remaining = _remaining.filter(function (r) { return r !== s; });
+
+            var text   = s.text;
+            var cDelay = (s.charDelay !== undefined) ? s.charDelay : CHAR_DELAY_MS;
+            var len    = text.length;
+
+            if (len === 0) {
+              // Blank line — just fire onFinish after delay
+              var blankTimer = window.setTimeout(function () {
+                _liveSpan = null;
+                _liveStep = null;
+                if (last && !_done) {
+                  _done = true;
+                  if (skipBtn) { skipBtn.hidden = true; }
+                  document.removeEventListener("keydown", _onKey);
+                  if (typeof onDone === "function") { onDone(); }
+                }
+              }, s.delay);
+              _timers.push(blankTimer);
+              return;
+            }
+
+            // Type each character
+            for (var ci = 0; ci < len; ci++) {
+              (function (charIndex) {
+                var ct = window.setTimeout(function () {
+                  newSpan.textContent = text.slice(0, charIndex + 1);
+
+                  if (charIndex === len - 1) {
+                    // Line done typing → wait inter-line delay then advance
+                    _liveSpan = null;
+                    _liveStep = null;
+                    if (last && !_done) {
+                      var doneTimer = window.setTimeout(function () {
+                        if (!_done) {
+                          _done = true;
+                          if (skipBtn) { skipBtn.hidden = true; }
+                          document.removeEventListener("keydown", _onKey);
+                          if (typeof onDone === "function") { onDone(); }
+                        }
+                      }, s.delay);
+                      _timers.push(doneTimer);
+                    }
+                  }
+                }, cDelay * charIndex);
+                _timers.push(ct);
+              })(ci);
+            }
+          }, startMs);
+          _timers.push(spanTimer);
+        })(stepStart, step, isLast);
+
+        // Add to remaining BEFORE the timer fires so skip can flush it
+        _remaining.push(step);
+
+        // Advance cursor: time to type this line + inter-line delay
+        var lineTypingTime = step.text.length *
+          ((step.charDelay !== undefined) ? step.charDelay : CHAR_DELAY_MS);
+        cursor = stepStart + lineTypingTime + step.delay;
+
+        void stepIdx; // suppress unused var lint
       });
     }
 
-    return { play: play };
+    /* ── Public: static/instant render (used for handle-prompt re-runs) */
+
+    /**
+     * Append a single pre-formed line to the transcript immediately.
+     * Exposed so handle-prompt and other callers can print terminal output
+     * without going through the full typewriter engine.
+     * @param {string} text
+     * @param {string} [cls]
+     */
+    function printLine(text, cls) {
+      _appendLineFull({ text: text, cls: cls || "" });
+    }
+
+    return { play: play, printLine: printLine };
+  })();
+
+  /* ─────────────────────────────────────────────────────────────────────
+     4b. HANDLE PROMPT
+     Requirement 2 — handle-based identity.
+     Presents an in-terminal input form after boot for first-time callers.
+     Re-exposed as HandlePrompt.change() for the settings screen (task 12).
+     ───────────────────────────────────────────────────────────────────── */
+  var HandlePrompt = (function () {
+
+    /* Validation rules (Req 2.2–2.3) */
+    var MIN_LEN  = 2;
+    var MAX_LEN  = 20;
+    var ALLOWED  = /^[A-Za-z0-9 _\-.]+$/;
+
+    /**
+     * Validate a handle candidate.
+     * @param {string} raw   — untrimmed input value
+     * @returns {{ ok: boolean, handle: string, error: string }}
+     */
+    function validate(raw) {
+      var handle = raw.trim();
+      if (handle.length === 0) {
+        return { ok: false, handle: handle,
+          error: "HANDLE REQUIRED — enter a name to call the board." };
+      }
+      if (handle.length < MIN_LEN) {
+        return { ok: false, handle: handle,
+          error: "TOO SHORT — handle must be at least " + MIN_LEN + " characters." };
+      }
+      if (handle.length > MAX_LEN) {
+        return { ok: false, handle: handle,
+          error: "TOO LONG — handle must be " + MAX_LEN + " characters or fewer." };
+      }
+      if (!ALLOWED.test(handle)) {
+        return { ok: false, handle: handle,
+          error: "INVALID CHARACTERS — letters, digits, spaces, and _ - . only." };
+      }
+      return { ok: true, handle: handle, error: "" };
+    }
+
+    /**
+     * Render the handle-entry form into #active-screen.
+     * @param {Function} onAccepted — called with the validated handle string
+     * @param {boolean}  [isChange] — true when changing an existing handle
+     */
+    function present(onAccepted, isChange) {
+      var activeScreen = document.getElementById("active-screen");
+      var statusHandle = document.getElementById("status-handle");
+      var prompt = isChange
+        ? "CHANGE HANDLE — enter your new call sign:"
+        : "FIRST CONNECT — choose your caller handle:";
+
+      activeScreen.innerHTML =
+        '<section class="handle-prompt" aria-label="Handle entry">'
+        + '<p class="line">' + escapeHtml(prompt) + '</p>'
+        + '<p class="line line--dim">'
+        + '2–20 chars · letters, digits, spaces, _ - . allowed'
+        + '</p>'
+        + '<form id="handle-form" class="handle-form" autocomplete="off">'
+        +   '<label class="handle-label" for="handle-input">HANDLE&gt; </label>'
+        +   '<input id="handle-input" class="handle-input" type="text"'
+        +          ' maxlength="' + MAX_LEN + '"'
+        +          ' aria-label="Caller handle"'
+        +          ' autofocus />'
+        +   '<button type="submit" class="handle-submit">[ CONNECT ]</button>'
+        + '</form>'
+        + '<p id="handle-error" class="line line--warn" aria-live="polite" hidden></p>'
+        + '</section>';
+
+      var form      = document.getElementById("handle-form");
+      var input     = document.getElementById("handle-input");
+      var errorLine = document.getElementById("handle-error");
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var result = validate(input.value);
+        if (!result.ok) {
+          errorLine.textContent = result.error;
+          errorLine.hidden = false;
+          input.focus();
+          return;
+        }
+        // Persist and announce
+        Store.update(function (s) {
+          s.meta.handle = result.handle;
+        });
+        if (statusHandle) {
+          statusHandle.textContent = "CALLER: " + result.handle.toUpperCase();
+        }
+        // Print accepted message to transcript
+        BootSequence.printLine(
+          "HANDLE ACCEPTED: " + result.handle.toUpperCase(),
+          "line--bright"
+        );
+        activeScreen.innerHTML = "";
+        if (typeof onAccepted === "function") { onAccepted(result.handle); }
+      });
+
+      // Focus input on render
+      if (input) { input.focus(); }
+    }
+
+    /**
+     * Ask for a new handle to replace the current one.
+     * @param {Function} onAccepted — called with the new handle string
+     */
+    function change(onAccepted) {
+      present(onAccepted, true);
+    }
+
+    return { present: present, change: change, validate: validate };
   })();
 
   /* ─────────────────────────────────────────────────────────────────────
@@ -835,8 +1183,18 @@
         warnings +
         '<p class="screen-title">MAIN MENU</p>' +
         '<p class="screen-subtitle">Caller: ' + handle + '</p>' +
-        '<p class="screen-subtitle">Full menu navigation arrives in task 6.</p>';
+        '<p class="screen-subtitle">Full menu navigation arrives in task 6.</p>' +
+        '<p class="screen-subtitle">' +
+        '<button type="button" id="change-handle-btn" class="menu-btn">' +
+        '[ CHANGE HANDLE ]</button></p>';
       showNav();
+
+      var chBtn = document.getElementById("change-handle-btn");
+      if (chBtn) {
+        chBtn.addEventListener("click", function () {
+          HandlePrompt.change(function () { renderMenuStub(); });
+        });
+      }
     }
 
     function route() {
@@ -871,7 +1229,7 @@
 
   /* ─────────────────────────────────────────────────────────────────────
      7. INIT
-     Wire Store → SeedData → BootSequence → Router.
+     Wire Store → SeedData → BootSequence → HandlePrompt → Router.
      ───────────────────────────────────────────────────────────────────── */
   (function init() {
     // 1. Load (or seed) state
@@ -890,10 +1248,18 @@
       statusHandle.textContent = "CALLER: " + state.meta.handle.toUpperCase();
     }
 
-    // 4. Play boot sequence, then hand off to Router
+    // 4. Play boot sequence
     var returning = Boolean(state.meta.handle);
-    BootSequence.play(returning, function () {
-      Router.init();
+    BootSequence.play(returning, function afterBoot() {
+      // 5. First-time caller → handle prompt; returning caller → skip prompt
+      var currentState = Store.get();
+      if (!currentState.meta.handle) {
+        HandlePrompt.present(function (/*handle*/) {
+          Router.init();
+        });
+      } else {
+        Router.init();
+      }
     });
   })();
 
