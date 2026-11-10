@@ -586,45 +586,143 @@
         year:    "1994",
         palette: false,
         lines:   [
-          "  +-------------------------------------------------+",
-          "  |   [ art piece authored in task 9.3 — logo ]    |",
-          "  +-------------------------------------------------+"
+          "",
+          " \u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591",
+          " \u2591                                                                              \u2591",
+          " \u2591   \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2588\u2557   \u2588\u2588\u2557 \u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557    \u2588\u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557  \u2591",
+          " \u2591   \u2588\u2588\u2554\u2550\u2550\u2550\u2550\u255d\u2588\u2588\u2554\u2550\u2550\u2550\u2550\u255d\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2557  \u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u2550\u2550\u255d\u2588\u2588\u2554\u2550\u2550\u2550\u2550\u255d    \u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2554\u2550\u2550\u2550\u2550\u255d  \u2591",
+          " \u2591   \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2588\u2557  \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2551\u2588\u2588\u2554\u2588\u2588\u2557 \u2588\u2588\u2551\u2588\u2588\u2551     \u2588\u2588\u2588\u2588\u2588\u2557      \u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255d\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255d\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557  \u2591",
+          " \u2591   \u255a\u2550\u2550\u2550\u2550\u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u255d  \u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2551\u2588\u2588\u2551\u255a\u2588\u2588\u2557\u2588\u2588\u2551\u2588\u2588\u2551     \u2588\u2588\u2554\u2550\u2550\u255d      \u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u255a\u2550\u2550\u2550\u2550\u2588\u2588\u2551  \u2591",
+          " \u2591   \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2551\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2551  \u2588\u2588\u2551\u2588\u2588\u2551 \u255a\u2588\u2588\u2588\u2588\u2551\u255a\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557    \u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255d\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255d\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2551  \u2591",
+          " \u2591   \u255a\u2550\u2550\u2550\u2550\u2550\u2550\u255d\u255a\u2550\u2550\u2550\u2550\u2550\u2550\u255d\u255a\u2550\u255d  \u255a\u2550\u255d\u255a\u2550\u255d  \u255a\u2550\u2550\u2550\u255d \u255a\u2550\u2550\u2550\u2550\u2550\u255d\u255a\u2550\u2550\u2550\u2550\u2550\u2550\u255d    \u255a\u2550\u2550\u2550\u2550\u2550\u255d \u255a\u2550\u2550\u2550\u2550\u2550\u255d \u255a\u2550\u2550\u2550\u2550\u2550\u2550\u255d  \u2591",
+          " \u2591                                                                              \u2591",
+          " \u2591              \u00b7  \u00b7 \u00b7  WHERE THE DEAD STILL DIAL IN  \u00b7 \u00b7  \u00b7                   \u2591",
+          " \u2591                                                                              \u2591",
+          " \u2591   \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510   \u2591",
+          " \u2591   \u2502  ATDT 555-0199  \u00b7  CONNECT 14400  \u00b7  NODE 1 OPEN  \u00b7  SINCE 1994   \u2502   \u2591",
+          " \u2591   \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518   \u2591",
+          " \u2591                                                                              \u2591",
+          " \u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591",
+          ""
         ]
       },
       {
         id:      "art-house",
-        title:   "Haunted House",
+        title:   "The Board House on Baud Hill",
         artist:  "VHS_GH0ST",
         year:    "1995",
         palette: false,
         lines:   [
-          "  +-------------------------------------------------+",
-          "  |   [ art piece authored in task 9.3 — house ]   |",
-          "  +-------------------------------------------------+"
+          "",
+          "                             *",
+          "                           . | .",
+          "                         .   |   .",
+          "                       .  *  |  *  .",
+          "                      /\\     |     /\\",
+          "                     /  \\    |    /  \\",
+          "                    / /\\ \\   |   / /\\ \\",
+          "                   / /  \\ \\_/ \\_/ /  \\ \\",
+          "                  /_/    \\_______/    \\_\\",
+          "                 |      |  _   _  |      |",
+          "                 |      | | | | | |      |",
+          "                 |      | |_| |_| |      |",
+          "                 |   ___|         |___   |",
+          "                 |  | . |  _____  | . |  |",
+          "                 |  |___|_|  _  |_|___|  |",
+          "                 |          | |          |",
+          "                 |   _____  | |  _____   |",
+          "                 |  |     | | | |     |  |",
+          "                 |  | .-. | | | | .-. |  |",
+          "                 |  | |X| | | | | |X| |  |",
+          "                 |  | `-' |   | | `-' |  |",
+          "                 |  |_____|   | |_____|  |",
+          "                 |            | |        |",
+          "                 |____________| |________|",
+          "                        | |     | |",
+          "                        | |     | |",
+          "                      ~~~~~~~~~~~~~~~~~~",
+          "                   T H E   B O A R D   H O U S E",
+          "                     O N   B A U D   H I L L",
+          ""
         ]
       },
       {
         id:      "art-modem",
-        title:   "Modern Modem",
+        title:   "14.4 and Still Screeching",
         artist:  "baud_rate_barbie",
         year:    "1994",
         palette: false,
         lines:   [
-          "  +-------------------------------------------------+",
-          "  |   [ art piece authored in task 9.3 — modem ]   |",
-          "  +-------------------------------------------------+"
+          "",
+          "         .-------------------------------------------------------.       ",
+          "         |  H A Y E S   S M A R T M O D E M   1 4 4 0 0        |",
+          "         '-------------------------------------------------------'",
+          "        /                                                         \\",
+          "       /  .----.  .----.  .----.  .----.  .----.  .----.  .----.  \\",
+          "      /   | TD |  | RD |  | CD |  | OH |  |MR  |  | TR |  | AA |   \\",
+          "     /    | __ |  | __ |  | __ |  | __ |  | __ |  | __ |  | __ |    \\",
+          "    |     |[**]|  |[  ]|  |[  ]|  |[**]|  |[**]|  |[**]|  |[  ]|     |",
+          "    |     '----'  '----'  '----'  '----'  '----'  '----'  '----'     |",
+          "    |                                                                  |",
+          "    |   .-----------------------------------------------.             |",
+          "    |   |  ~ screech ~ hiss ~ bong ~ CONNECT 14400 ~   |             |",
+          "    |   |  ATDT 555-0199........................        |             |",
+          "    |   |  CARRIER DETECT. LAP-M. V.42bis.             |             |",
+          "    |   '-----------------------------------------------'             |",
+          "    |                                                 .----.          |",
+          "    |   [ VOLUME ]  .----. .----.       [ DIAL ]     | oo |          |",
+          "    |               | -- | | ++ |                    '----'          |",
+          "    |               '----' '----'                                     |",
+          "    |                                                                  |",
+          "    |   ============ PHONE ===|=== LINE ===========                   |",
+          "     \\                                                               /",
+          "      '-------------------------------------------------------------'",
+          "              |                                      |",
+          "           [RJ-11]                               [RJ-11]",
+          "         to computer                           to wall jack",
+          "                   1 4 . 4   A N D   S T I L L   S C R E E C H I N G",
+          ""
         ]
       },
       {
         id:      "art-ghost",
-        title:   "The SysOp Ghost",
+        title:   "Portrait of the Operator",
         artist:  "null_sector",
         year:    "1996",
-        palette: true,
+        palette: false,
         lines:   [
-          "  +-------------------------------------------------+",
-          "  |   [ art piece authored in task 9.3 — ghost ]   |",
-          "  +-------------------------------------------------+"
+          "",
+          "         .  *    .       *    .      *    .    *",
+          "      *     .        *       .    *         .      *",
+          "   .    *       .        .       .      *       .",
+          "         ___________________________________________",
+          "        /  .   THE SYSOP GHOST   .   PORT 1994   . \\",
+          "        |   \"NODE 1 IS ALWAYS OPEN.  ALWAYS.\"       |",
+          "        '-------------------------------------------'",
+          "",
+          "                        .  *  .",
+          "                    *  /`-----'\\  *",
+          "                      ( o     o )",
+          "                   .   \\  ___  /   .",
+          "                    *   | (u) |   *",
+          "                        |     |",
+          "                       /|     |\\",
+          "                      * |     | *",
+          "                        |     |",
+          "                     .--'-----'--.",
+          "                    /  |  | |  |  \\",
+          "                   |   |  | |  |   |",
+          "                    \\__|__|_|__|__/",
+          "",
+          "           H A N D L E :   T h e   S y s O p   G h o s t",
+          "           B A U D    :   1 4 4 0 0   ( a n d   b e y o n d )",
+          "           S T A T U S :   O N L I N E   S I N C E   1 9 9 4",
+          "",
+          "   .    *       .    \"I read every post.    *       .    *",
+          "      *       .       Even the ones you        .        *",
+          "   .      *       .   thought you deleted.\"  *      .",
+          "      *    .   *    .      *    .    *   .      *    .",
+          ""
         ]
       },
       {
@@ -632,23 +730,73 @@
         title:   "Pumpkin Mainframe",
         artist:  "CAPTAIN_KERMIT",
         year:    "1995",
-        palette: true,
+        palette: false,
         lines:   [
-          "  +-------------------------------------------------+",
-          "  |  [ art piece authored in task 9.3 — pumpkin ]  |",
-          "  +-------------------------------------------------+"
+          "",
+          "      .------------------------------------------------------------.  ",
+          "      |   P U M P K I N   M A I N F R A M E   -  O C T  1 9 9 5  |",
+          "      '------------------------------------------------------------'",
+          "",
+          "              ,-.                              ,-.",
+          "             /   \\          .----.            /   \\",
+          "            | o o |        /      \\          | o o |",
+          "             \\   /   _____/ BIOS   \\_____     \\   /",
+          "              '-'   /                    \\     '-'",
+          "                   /   .--------------.   \\",
+          "                  |    |  >_ ROOT@BBS  |   |",
+          "                  |    |               |   |",
+          "      ____________|    | 640K IS ENOUGH|   |____________",
+          "     /            |    | FOR ANYBODY   |   |            \\",
+          "    /  ___  ___   |    |               |   |   ___  ___  \\",
+          "   |  | ~ || ~ |  |    |  HAPPY HALLOWEE|  |  | ~ || ~ | |",
+          "   |  |___||___|  |    |   _____________|  |  |___||___| |",
+          "   |               \\   '---'            '--'              |",
+          "   |   DRIVE A:     \\__________________________/          |",
+          "   |  [1.44 MB] [===================================]     |",
+          "   |   DRIVE B:     .    .    .    .    .    .           |",
+          "   |  [5.25 IN]  *    *    *  RUN  *    *    *   *       |",
+          "    \\                                                    /",
+          "     \\  IT TAKES A WITCH TO KNOW A WITCH -- BIOS, 1995 /",
+          "      '--------------------------------------------------'",
+          "        |   |   |   |   |   |   |   |   |   |   |   |",
+          "       [P] [O] [W] [E] [R] [ ] [O] [N] [ ] [\u00b7] [\u00b7] [\u00b7]",
+          ""
         ]
       },
       {
         id:      "art-floppy",
-        title:   "R.I.P. Floppy",
-        artist:  "modem_moth",
+        title:   "R.I.P. 1.44MB",
+        artist:  "diskette_diva",
         year:    "1997",
         palette: false,
         lines:   [
-          "  +-------------------------------------------------+",
-          "  |   [ art piece authored in task 9.3 — floppy ]  |",
-          "  +-------------------------------------------------+"
+          "",
+          "                    . . . . . . . . . . . .",
+          "                 .                           .",
+          "              .      _____________________      .",
+          "            .        |                   |        .",
+          "          .          |   _____________   |          .",
+          "         .           |  |             |  |           .",
+          "        .            |  |   R . I . P |  |            .",
+          "        .            |  |             |  |            .",
+          "        .            |  |   1 . 4 4   |  |            .",
+          "        .            |  |     M B     |  |            .",
+          "        .            |  |_____________|  |            .",
+          "        .            |      _____        |            .",
+          "         .           |     |     |       |           .",
+          "          .          |_____|     |_______|          .",
+          "            .              |   |                 .",
+          "              .             '---'              .",
+          "                 .                          .",
+          "                    ' . . . . . . . . . '",
+          "",
+          "         H E R E   L I E S   T H E   3 . 5 \"   F L O P P Y",
+          "              B O R N :  1 9 8 2   -   D I E D :  2 0 1 1",
+          "           \" S H E   S A V E D   O U R   F I L E S \"",
+          "              \" W E   S T I L L   H E A R   H E R",
+          "               C L I C K I N G   I N   T H E   N I G H T \"",
+          "                    - - - diskette_diva, 1997 - - -",
+          ""
         ]
       }
     ];
@@ -1721,16 +1869,280 @@
       showNav();
     }
 
-    function renderLog() {
-      _renderPlaceholder("SÉANCE LOG", "Task 8 — guestbook implementation");
+    /* ── 8.1  Séance Log (guestbook) ────────────────────────────── */
+
+    var LOG_PAGE_SIZE = 20;
+
+    /**
+     * Render the séance log screen.
+     * @param {number} [page=0] — 0-indexed page of LOG_PAGE_SIZE entries
+     */
+    function renderLog(page) {
+      page = page || 0;
+      var state   = Store.get();
+      var allLog  = state.log.slice().sort(function (a, b) {
+        /* Newest first */
+        if (b.createdAt < a.createdAt) { return -1; }
+        if (b.createdAt > a.createdAt) { return 1; }
+        return 0;
+      });
+
+      var total    = allLog.length;
+      var start    = page * LOG_PAGE_SIZE;
+      var end      = Math.min(start + LOG_PAGE_SIZE, total);
+      var pageLog  = allLog.slice(start, end);
+
+      /* ── Entry rows ── */
+      var rows = pageLog.length === 0
+        ? '<li class="log-row log-row--empty"><span class="line line--dim">No entries yet. Be the first to sign the log.</span></li>'
+        : pageLog.map(function (entry) {
+            var ghostClass = entry.ghost ? " log-row--ghost" : "";
+            var handleHtml = '<span class="handle' + (entry.ghost ? " handle--ghost" : "") + '">'
+              + escapeHtml(entry.author)
+              + (entry.ghost ? ' <span class="sysop-tag" aria-label="SysOp">[SYSOP]</span>' : "")
+              + '</span>';
+            return '<li class="log-row' + ghostClass + '">'
+              + '<div class="log-entry-header">'
+              + handleHtml
+              + ' <time class="log-time" datetime="' + escapeHtml(entry.createdAt) + '">'
+              + escapeHtml(fmtDate(entry.createdAt))
+              + '</time>'
+              + '</div>'
+              + '<div class="log-entry-body">'
+              + escapeHtml(entry.message)
+              + '</div>'
+              + '</li>';
+          }).join("");
+
+      /* ── Pagination controls ── */
+      var pagerHtml = "";
+      if (total > LOG_PAGE_SIZE) {
+        var totalPages = Math.ceil(total / LOG_PAGE_SIZE);
+        var prevHtml = page > 0
+          ? '<button type="button" class="menu-btn" id="log-prev-btn">[&lt;] OLDER</button>'
+          : '<button type="button" class="menu-btn menu-btn--disabled" disabled aria-disabled="true">[&lt;] OLDER</button>';
+        var nextHtml = end < total
+          ? '<button type="button" class="menu-btn" id="log-next-btn">NEWER [&gt;]</button>'
+          : '<button type="button" class="menu-btn menu-btn--disabled" disabled aria-disabled="true">NEWER [&gt;]</button>';
+        pagerHtml = '<div class="log-pager" aria-label="Pagination">'
+          + prevHtml
+          + '<span class="log-pager-info line line--dim">Page '
+          + escapeHtml(String(page + 1)) + ' of ' + escapeHtml(String(totalPages))
+          + ' (' + escapeHtml(String(total)) + ' entries)</span>'
+          + nextHtml
+          + '</div>';
+      }
+
+      /* ── 8.2  Entry form ── */
+      var MAX_LOG = 140;
+      var formHtml =
+        '<section class="log-form-section" aria-label="Sign the séance log">'
+        + '<h2 class="screen-subtitle">SIGN THE LOG</h2>'
+        + '<form id="log-form" class="post-form" autocomplete="off" novalidate>'
+        + '<div class="form-row">'
+        + '<label class="form-label" for="log-message">MESSAGE&gt;</label>'
+        + '<textarea id="log-message" class="form-textarea form-textarea--log" rows="3"'
+        + ' maxlength="' + MAX_LOG + '"'
+        + ' aria-label="Log entry message" required></textarea>'
+        + '</div>'
+        + '<p id="log-char-count" class="line line--dim char-count">0 / ' + MAX_LOG + ' chars</p>'
+        + '<p id="log-error" class="line line--warn" aria-live="polite" hidden></p>'
+        + '<div class="form-actions">'
+        + '<button type="submit" class="menu-btn">[S] SIGN LOG</button>'
+        + '</div>'
+        + '</form>'
+        + '</section>';
+
+      _activeScreen.innerHTML =
+        _noticeHtml() +
+        '<section class="screen-section" aria-label="Séance Log">' +
+        '<h1 class="screen-title">THE SÉANCE LOG</h1>' +
+        '<p class="line line--dim">Sign your name in the dark. 140 characters. Leave a mark.</p>' +
+        '<ul class="log-list" id="log-list" role="list">' + rows + '</ul>' +
+        pagerHtml +
+        formHtml +
+        '<p class="line line--dim back-link"><a class="menu-link" href="#/">&larr; BACK TO MENU</a></p>' +
+        '</section>';
+
+      showNav();
+
+      /* ── Pagination button handlers ── */
+      var prevBtn = document.getElementById("log-prev-btn");
+      var nextBtn = document.getElementById("log-next-btn");
+      if (prevBtn) {
+        prevBtn.addEventListener("click", function () {
+          renderLog(page - 1);
+          var logList = document.getElementById("log-list");
+          if (logList) { logList.scrollIntoView({ behavior: "smooth", block: "start" }); }
+        });
+      }
+      if (nextBtn) {
+        nextBtn.addEventListener("click", function () {
+          renderLog(page + 1);
+          var logList = document.getElementById("log-list");
+          if (logList) { logList.scrollIntoView({ behavior: "smooth", block: "start" }); }
+        });
+      }
+
+      /* ── Log form handler ── */
+      var logForm    = document.getElementById("log-form");
+      var msgEl      = document.getElementById("log-message");
+      var charCount  = document.getElementById("log-char-count");
+      var errorEl    = document.getElementById("log-error");
+
+      if (msgEl && charCount) {
+        msgEl.addEventListener("input", function () {
+          var len = msgEl.value.length;
+          charCount.textContent = len + " / " + MAX_LOG + " chars";
+          charCount.classList.toggle("line--warn", len > MAX_LOG);
+        });
+      }
+
+      if (logForm) {
+        logForm.addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          /* Require handle before signing (Req 2.1) */
+          if (!_requireHandle(function () { renderLog(0); })) { return; }
+
+          var msg = msgEl ? msgEl.value.trim() : "";
+
+          /* Validation: 1–140 chars (Req 4.2–4.3) */
+          if (msg.length === 0) {
+            if (errorEl) {
+              errorEl.textContent = "ENTRY REQUIRED — write something before you sign.";
+              errorEl.hidden = false;
+            }
+            return;
+          }
+          if (msg.length > MAX_LOG) {
+            if (errorEl) {
+              errorEl.textContent = "TOO LONG — entries must be " + MAX_LOG
+                + " characters or fewer. Yours is " + msg.length + ".";
+              errorEl.hidden = false;
+            }
+            return;
+          }
+          if (errorEl) { errorEl.hidden = true; }
+
+          var currentState = Store.get();
+          var newEntry = {
+            id:        genId(),
+            author:    currentState.meta.handle,
+            message:   msg,
+            createdAt: new Date().toISOString(),
+            ghost:     false
+          };
+
+          Store.update(function (s) {
+            s.log.push(newEntry);
+          });
+
+          /* Re-render at page 0 so the new entry is visible (newest-first) */
+          renderLog(0);
+
+          /* Scroll to the new entry */
+          var logList = document.getElementById("log-list");
+          if (logList) { logList.scrollIntoView({ behavior: "smooth", block: "start" }); }
+        });
+      }
     }
 
+    /* ── 9.1  Art gallery index ──────────────────────────────────── */
+
     function renderGallery() {
-      _renderPlaceholder("ART GALLERY", "Task 9 — gallery implementation");
+      var state = Store.get();
+      var art   = state.art || [];
+
+      var rows = art.length === 0
+        ? '<li class="art-row art-row--empty"><span class="line line--dim">No art pieces found.</span></li>'
+        : art.map(function (piece) {
+            return '<li class="art-row">'
+              + '<a class="art-link" href="#/art/' + escapeHtml(piece.id) + '">'
+              + escapeHtml(piece.title)
+              + '</a>'
+              + '<span class="art-meta">'
+              + 'by <span class="handle">' + escapeHtml(piece.artist) + '</span>'
+              + ' &middot; ' + escapeHtml(piece.year)
+              + '</span>'
+              + '</li>';
+          }).join("");
+
+      _activeScreen.innerHTML =
+        _noticeHtml() +
+        '<section class="screen-section" aria-label="Art Gallery">' +
+        '<h1 class="screen-title">ART GALLERY</h1>' +
+        '<p class="line line--dim">' + escapeHtml(String(art.length)) + ' piece'
+        + (art.length === 1 ? "" : "s") + ' in the collection. Select one to view.</p>' +
+        '<ul class="art-list" role="list">' + rows + '</ul>' +
+        '<p class="line line--dim back-link"><a class="menu-link" href="#/">&larr; BACK TO MENU</a></p>' +
+        '</section>';
+
+      showNav();
+    }
+
+    /* ── 9.1–9.2  Single art piece view ─────────────────────────── */
+
+    /**
+     * Convert internal color-span markup to ANSI-palette CSS spans.
+     * Markup format (after HTML-escaping): [cN]...[/c]
+     * where N is 0–15 (classic 16-color ANSI palette index).
+     * This conversion runs AFTER escapeHtml() so the source art can
+     * never inject real HTML — only our controlled span tags are emitted.
+     * @param {string} escaped — already-HTML-escaped line text
+     * @returns {string}
+     */
+    function _applyColorMarkup(escaped) {
+      /* Match [cN] or [c1N] after escaping turns [ and ] into &lbrack; etc.
+       * Because we write markup into the lines array directly (not via user
+       * input) we use a simpler approach: the lines are stored raw and we
+       * escape + then convert.  The color tags use characters that survive
+       * escapeHtml unchanged: [ ] / digits are not HTML-special.
+       */
+      return escaped.replace(/\[c(\d{1,2})\]([\s\S]*?)\[\/c\]/g, function (_, idx, inner) {
+        var n = parseInt(idx, 10);
+        if (n < 0 || n > 15) { return inner; }  // out of range: strip tag
+        return '<span class="ansi-' + n + '">' + inner + '</span>';
+      });
     }
 
     function renderArt(artId) {
-      _renderPlaceholder("ART PIECE — " + artId, "Task 9 — art view implementation");
+      var state = Store.get();
+      var piece = null;
+      (state.art || []).forEach(function (a) {
+        if (a.id === artId) { piece = a; }
+      });
+
+      if (!piece) {
+        renderNotFound("Art piece &ldquo;" + escapeHtml(artId) + "&rdquo; not found.");
+        return;
+      }
+
+      /* Build the <pre> content line-by-line.
+       * 1. Escape each line (Req 5.4 — art content can never inject HTML).
+       * 2. If the piece has palette markup, convert [cN]...[/c] tags
+       *    to <span class="ansi-N"> AFTER escaping (Req 5.3).
+       */
+      var preContent = (piece.lines || []).map(function (line) {
+        var escaped = escapeHtml(line);
+        return piece.palette ? _applyColorMarkup(escaped) : escaped;
+      }).join("\n");
+
+      _activeScreen.innerHTML =
+        _noticeHtml() +
+        '<section class="screen-section art-section" aria-label="Art piece: ' + escapeHtml(piece.title) + '">' +
+        '<h1 class="screen-title">' + escapeHtml(piece.title) + '</h1>' +
+        '<p class="line line--dim">'
+        + 'by <span class="handle">' + escapeHtml(piece.artist) + '</span>'
+        + ' &middot; ' + escapeHtml(piece.year)
+        + '</p>' +
+        '<div class="art-scroll-wrapper" tabindex="0" aria-label="Artwork (scroll horizontally if needed)">' +
+        '<pre class="art-pre">' + preContent + '</pre>' +
+        '</div>' +
+        '<p class="line line--dim back-link"><a class="menu-link" href="#/gallery">&larr; BACK TO GALLERY</a></p>' +
+        '</section>';
+
+      showNav();
     }
 
     function renderSettings() {

@@ -75,19 +75,19 @@ checks, and only then continue.
     rendering after save
   - _Requirements: 3.1–3.5_
 
-- [ ] 8. Séance log (guestbook)
-  - [ ] 8.1 Log screen, newest-first, with SYSOP-tagged ghost styling and
+- [x] 8. Séance log (guestbook)
+  - [x] 8.1 Log screen, newest-first, with SYSOP-tagged ghost styling and
     20-at-a-time reveal for long logs
-  - [ ] 8.2 Entry form with the 1–140 character rule enforced in-terminal
+  - [x] 8.2 Entry form with the 1–140 character rule enforced in-terminal
   - _Requirements: 4.1–4.5_
 
-- [ ] 9. ANSI/ASCII art gallery
-  - [ ] 9.1 Gallery index (at least 6 pieces: title, artist, year) and
+- [x] 9. ANSI/ASCII art gallery
+  - [x] 9.1 Gallery index (at least 6 pieces: title, artist, year) and
     art view rendering `<pre>` with exact whitespace preservation
-  - [ ] 9.2 ANSI palette spans: convert internal color markup to the
+  - [x] 9.2 ANSI palette spans: convert internal color markup to the
     16-color CSS palette after escaping; art block scrolls horizontally
     on narrow screens without breaking layout
-  - [ ] 9.3 Author at least 6 original art pieces into `assets/art/`
+  - [x] 9.3 Author at least 6 original art pieces into `assets/art/`
     (logo banner, haunted house, modem, ghost, pumpkin mainframe, RIP
     floppy) and inline them into seed data
   - _Requirements: 5.1–5.5_

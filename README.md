@@ -59,10 +59,10 @@ machine, and so is this).
 
 | File | Title | Artist | Year |
 |---|---|---|---|
-| `seance-logo.txt` | SÉANCE BBS (banner) | The SysOp Ghost | 1994 |
+| `seance-logo.txt` | SÉANCE BBS — Logo Banner | The SysOp Ghost | 1994 |
 | `haunted-house.txt` | The Board House on Baud Hill | VHS_GH0ST | 1995 |
 | `modem.txt` | 14.4 and Still Screeching | baud_rate_barbie | 1994 |
-| `the-sysop.txt` | Portrait of the Operator | N0CTURNE | 1996 |
+| `the-sysop.txt` | Portrait of the Operator | null_sector | 1996 |
 | `pumpkin-mainframe.txt` | Pumpkin Mainframe | CAPTAIN_KERMIT | 1995 |
 | `rip-floppy.txt` | R.I.P. 1.44MB | diskette_diva | 1997 |
 
